@@ -17,7 +17,7 @@ interface NavLink {
 interface NavbarProps {
   /**
    * Override the default navigation links.
-   * Defaults to Home, Jobs, Companies, About.
+   * Defaults to Jobs, Companies, About, Contact.
    */
   links?: NavLink[];
   /**
@@ -33,11 +33,34 @@ interface NavbarProps {
 /* ------------------------------------------------------------------ */
 
 const DEFAULT_LINKS: NavLink[] = [
-  { label: 'Home', href: '/' },
   { label: 'Jobs', href: '/jobs' },
   { label: 'Companies', href: '/companies' },
   { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
 ];
+
+/* ------------------------------------------------------------------ */
+/*  Search Icon                                                        */
+/* ------------------------------------------------------------------ */
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.5 17.5l-4.167-4.167M13.333 8.333A5 5 0 1 1 3.333 8.333a5 5 0 0 1 10 0z"
+      />
+    </svg>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  Hamburger Icon                                                     */
@@ -46,27 +69,17 @@ const DEFAULT_LINKS: NavLink[] = [
 function HamburgerIcon({ open }: { open: boolean }) {
   return (
     <svg
-      className="h-6 w-6"
+      className="h-5 w-5"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.75}
       aria-hidden="true"
     >
       {open ? (
-        /* X icon */
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M6 18L18 6M6 6l12 12"
-        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
       ) : (
-        /* Hamburger icon */
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M4 6h16M4 12h16M4 18h16"
-        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       )}
     </svg>
   );
@@ -79,22 +92,8 @@ function HamburgerIcon({ open }: { open: boolean }) {
 /**
  * Navbar — the primary application navigation bar.
  *
- * Features:
- * - Sticky positioning with glassmorphism backdrop blur
- * - Mobile-responsive with an animated hamburger menu
- * - WCAG 2.1 AA accessible (keyboard navigation, aria attributes, focus trapping)
- * - Logo with tagline
- * - Extensible auth slot for future authenticated navigation
- *
- * @example
- * // Guest mode (default)
- * <Navbar />
- *
- * // With authenticated user actions
- * <Navbar authSlot={<UserDropdown />} />
- *
- * // Custom links
- * <Navbar links={[{ label: 'Dashboard', href: '/dashboard' }]} />
+ * Minimal, no glassmorphism. Clean bottom border. Sticky top.
+ * Extensible auth slot for future authenticated navigation.
  */
 function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -109,7 +108,7 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
     setMobileOpen(false);
   }, []);
 
-  /* Close mobile menu on Escape key press */
+  /* Close mobile menu on Escape */
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape' && mobileOpen) {
@@ -117,89 +116,55 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
         menuButtonRef.current?.focus();
       }
     }
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [mobileOpen, closeMobile]);
 
-  /* Prevent body scroll when mobile menu is open */
+  /* Prevent body scroll when menu is open */
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
   return (
     <header
       ref={navRef}
-      className={cn(
-        'sticky top-0 z-50',
-        'border-b border-border/50',
-        'bg-surface/70 backdrop-blur-xl backdrop-saturate-150',
-        'supports-[backdrop-filter]:bg-surface/60',
-        'transition-all duration-300',
-      )}
+      className="sticky top-0 z-50 bg-surface border-b border-border"
     >
-      <Container
-        as="div"
-        padding="md"
-        className="flex h-16 items-center justify-between"
-      >
-        {/* ---- Logo & Tagline ---- */}
+      <Container as="div" padding="md" className="flex h-14 items-center justify-between">
+
+        {/* ---- Logo ---- */}
         <a
           href="/"
           className={cn(
-            'group flex items-center gap-2.5',
+            'flex items-center gap-2 rounded-md',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-            'rounded-lg',
           )}
           aria-label="JobSphere — Home"
         >
-          {/* Logo icon */}
           <div
-            className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-lg',
-              'bg-gradient-to-br from-primary to-accent',
-              'shadow-sm',
-              'transition-transform duration-200 group-hover:scale-105',
-            )}
+            className="flex h-8 w-8 items-center justify-center rounded-md bg-primary"
             aria-hidden="true"
           >
-            <span className="text-sm font-bold text-white" style={{ fontFamily: 'monospace' }}>
+            <span className="text-xs font-bold text-white" style={{ fontFamily: 'monospace' }}>
               {'</>'}
             </span>
           </div>
-
-          <div className="flex flex-col">
-            <span className="text-lg font-bold leading-tight text-text-primary">
-              Job
-              <span className="text-primary">Sphere</span>
-            </span>
-            <span className="hidden text-[10px] leading-none font-medium text-text-secondary sm:block">
-              Find Your Next Opportunity
-            </span>
-          </div>
+          <span className="text-base font-semibold text-text-primary tracking-tight">
+            JobSphere
+          </span>
         </a>
 
         {/* ---- Desktop Navigation ---- */}
-        <nav
-          className="hidden items-center gap-1 md:flex"
-          aria-label="Primary navigation"
-        >
+        <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary navigation">
           {links.map((link) => (
             <a
               key={link.href}
               href={link.href}
               className={cn(
-                'rounded-lg px-3 py-2 text-sm font-medium',
-                'text-text-secondary',
-                'transition-colors duration-200',
-                'hover:text-text-primary',
+                'rounded-md px-3 py-1.5 text-sm font-medium text-text-secondary',
+                'transition-colors duration-150',
+                'hover:text-text-primary hover:bg-background',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               )}
             >
@@ -209,10 +174,24 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
         </nav>
 
         {/* ---- Desktop Actions ---- */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
+          <button
+            type="button"
+            aria-label="Search"
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-md text-text-secondary',
+              'transition-colors duration-150 hover:text-text-primary hover:bg-background',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+            )}
+          >
+            <SearchIcon className="h-4.5 w-4.5" />
+          </button>
+
+          <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+
           {authSlot ?? (
             <>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-text-secondary font-medium">
                 Login
               </Button>
               <Button variant="primary" size="sm">
@@ -244,26 +223,25 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
         aria-modal="true"
         aria-label="Mobile navigation"
         className={cn(
-          'fixed inset-x-0 top-16 bottom-0 z-40 md:hidden',
-          'bg-surface/95 backdrop-blur-xl',
-          'transition-all duration-300 ease-in-out',
+          'fixed inset-x-0 top-14 bottom-0 z-40 md:hidden',
+          'bg-surface border-t border-border',
+          'transition-all duration-200 ease-out',
           mobileOpen
             ? 'visible translate-y-0 opacity-100'
-            : 'invisible -translate-y-4 opacity-0',
+            : 'invisible -translate-y-2 opacity-0',
         )}
       >
-        <Container padding="md" className="flex flex-col gap-2 pt-4 pb-6">
+        <Container padding="md" className="flex flex-col gap-1 pt-3 pb-6">
           <nav aria-label="Mobile navigation">
-            <ul className="flex flex-col gap-1" role="list">
+            <ul className="flex flex-col gap-0.5" role="list">
               {links.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
                     className={cn(
-                      'flex items-center rounded-lg px-4 py-3 text-base font-medium',
-                      'text-text-secondary',
-                      'transition-colors duration-200',
-                      'hover:bg-primary/5 hover:text-text-primary',
+                      'flex items-center rounded-md px-3 py-2.5 text-sm font-medium',
+                      'text-text-secondary transition-colors duration-150',
+                      'hover:bg-background hover:text-text-primary',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                     )}
                     onClick={closeMobile}
@@ -275,14 +253,13 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
             </ul>
           </nav>
 
-          {/* Mobile Actions */}
-          <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
+          <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
             {authSlot ?? (
               <>
-                <Button variant="outline" size="lg" className="w-full justify-center">
+                <Button variant="outline" size="md" className="w-full justify-center">
                   Login
                 </Button>
-                <Button variant="primary" size="lg" className="w-full justify-center">
+                <Button variant="primary" size="md" className="w-full justify-center">
                   Register
                 </Button>
               </>

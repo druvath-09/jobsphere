@@ -31,18 +31,18 @@
 }
 
 :root {
-  /* Colors — Emerald-primary dark palette */
-  --primary: #10B981;
-  --secondary: #374151;
-  --accent: #14B8A6;
-  --background: #0B1220;
-  --surface: #111827;
-  --border: #1E293B;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --success: #22C55E;
-  --warning: #F59E0B;
-  --error: #EF4444;
+  /* Colors — clean light professional palette */
+  --primary: #0F766E;
+  --secondary: #334155;
+  --accent: #F59E0B;
+  --background: #F8FAFC;
+  --surface: #FFFFFF;
+  --border: #E5E7EB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --success: #059669;
+  --warning: #D97706;
+  --error: #DC2626;
 
   /* Typography Fallbacks */
   --font-fallback: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -56,75 +56,38 @@
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
 
-  /* Shadows — deeper for dark surfaces */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-
-  /* Spacing Scale */
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-3: 0.75rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.25rem;
-  --spacing-6: 1.5rem;
-  --spacing-8: 2rem;
-  --spacing-10: 2.5rem;
-  --spacing-12: 3rem;
-  --spacing-16: 4rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #10B981;
-    --secondary: #374151;
-    --accent: #14B8A6;
-    --background: #0B1220;
-    --surface: #111827;
-    --border: #1E293B;
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --success: #22C55E;
-    --warning: #FBBF24;
-    --error: #F87171;
-  }
-}
-
-.dark {
-  --primary: #10B981;
-  --secondary: #374151;
-  --accent: #14B8A6;
-  --background: #0B1220;
-  --surface: #111827;
-  --border: #1E293B;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --success: #22C55E;
-  --warning: #FBBF24;
-  --error: #F87171;
+  /* Shadows — light, subtle */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.04);
 }
 
 /* Global resets & typography base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: var(--font-sans);
   color: var(--text-primary);
   background-color: var(--background);
-  transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
+  line-height: 1.5;
 }
 
 /* Shared keyframe animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
