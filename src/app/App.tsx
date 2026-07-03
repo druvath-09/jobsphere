@@ -1,4 +1,4 @@
-import { HomePage } from '@/pages/home';
+import { AppRouter } from './router';
 
 /**
  * Root application component.
@@ -7,7 +7,7 @@ import { HomePage } from '@/pages/home';
  * with landing page sections. Routing will be added in a later phase.
  */
 function App() {
-  return <HomePage />;
+  return <AppRouter />;
 }
 
 export default App;

@@ -1,0 +1,115 @@
+import { Badge, Button, Card } from '@/shared/components/ui';
+import { cn } from '@/shared/lib/utils';
+import type { JobListing } from '@/entities/job';
+
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+      <circle cx="8" cy="8" r="6.25" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 4.75v3.5l2.25 1.5" />
+    </svg>
+  );
+}
+
+function MapPinIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 8.5A1.5 1.5 0 1 0 8 5.5a1.5 1.5 0 0 0 0 3z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.75C5.14 1.75 2.833 4.06 2.833 6.917c0 3.65 5.167 7.333 5.167 7.333s5.167-3.683 5.167-7.333C13.167 4.06 10.86 1.75 8 1.75z" />
+    </svg>
+  );
+}
+
+function BookmarkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 2.5h8a.5.5 0 0 1 .5.5v10.5L8 10.75 3.5 13.5V3a.5.5 0 0 1 .5-.5z" />
+    </svg>
+  );
+}
+
+function workModeVariant(workMode: JobListing['workMode']) {
+  if (workMode === 'Remote') return 'success' as const;
+  if (workMode === 'Hybrid') return 'warning' as const;
+  return 'secondary' as const;
+}
+
+interface JobCardProps {
+  job: JobListing;
+}
+
+function JobCard({ job }: JobCardProps) {
+  return (
+    <Card interactive className="flex h-full flex-col overflow-hidden">
+      <div className="flex items-start gap-4 p-5 sm:p-6">
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold text-white shadow-sm"
+          style={{ backgroundColor: job.companyColor }}
+          aria-hidden="true"
+        >
+          {job.companyInitial}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base font-semibold text-text-primary">{job.title}</h3>
+            {job.featured && (
+              <Badge variant="accent" className="text-[11px]">
+                Featured
+              </Badge>
+            )}
+          </div>
+
+          <p className="mt-1 text-sm font-medium text-text-secondary">{job.company}</p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+            <span className="inline-flex items-center gap-1.5">
+              <MapPinIcon className="h-3.5 w-3.5" />
+              {job.location}
+            </span>
+            <span>{job.salaryLabel}</span>
+            <span>{job.experienceLabel}</span>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 text-xs text-text-secondary">
+          <ClockIcon className="h-3.5 w-3.5" />
+          {job.postedDaysAgo === 0 ? 'Today' : `${job.postedDaysAgo}d ago`}
+        </div>
+      </div>
+
+      <div className="px-5 sm:px-6">
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant={workModeVariant(job.workMode)}>{job.workMode}</Badge>
+          <Badge variant="outline">{job.employmentType}</Badge>
+          {job.skills.slice(0, 3).map((skill) => (
+            <Badge key={skill} variant="outline">
+              {skill}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <p className="px-5 pt-4 text-sm leading-6 text-text-secondary sm:px-6">{job.description}</p>
+
+      <div className="mt-auto flex items-center gap-3 px-5 py-5 sm:px-6">
+        <Button variant="primary" size="sm" className="flex-1 sm:flex-none">
+          Apply now
+        </Button>
+        <button
+          type="button"
+          aria-label={`Save ${job.title} at ${job.company}`}
+          className={cn(
+            'flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-text-secondary',
+            'transition-colors duration-150 hover:border-primary/30 hover:text-primary',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+          )}
+        >
+          <BookmarkIcon className="h-4 w-4" />
+        </button>
+      </div>
+    </Card>
+  );
+}
+
+export { JobCard };

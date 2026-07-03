@@ -75,9 +75,19 @@ function BuildingIcon({ className }: { className?: string }) {
 function HeroSection() {
   const [searchQuery, setSearchQuery] = useState('');
 
+  function navigateTo(path: string) {
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }
+
+  function getJobsPath(query: string) {
+    const normalizedQuery = query.trim();
+    return normalizedQuery ? `/jobs?q=${encodeURIComponent(normalizedQuery)}` : '/jobs';
+  }
+
   function handleSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Search functionality will be implemented in a future phase.
+    navigateTo(getJobsPath(searchQuery));
   }
 
   return (
@@ -148,6 +158,7 @@ function HeroSection() {
                 size="md"
                 leftIcon={<BuildingIcon className="h-4 w-4" />}
                 className="flex-1 sm:flex-none"
+                onClick={() => navigateTo('/companies')}
               >
                 Browse Companies
               </Button>
