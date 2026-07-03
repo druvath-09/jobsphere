@@ -170,21 +170,9 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
             )}
             aria-hidden="true"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="h-5 w-5 text-white"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-              <path
-                d="M8 12a4 4 0 0 1 8 0"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-            </svg>
+            <span className="text-sm font-bold text-white" style={{ fontFamily: 'monospace' }}>
+              {'</>'}
+            </span>
           </div>
 
           <div className="flex flex-col">
@@ -211,7 +199,7 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
                 'rounded-lg px-3 py-2 text-sm font-medium',
                 'text-text-secondary',
                 'transition-colors duration-200',
-                'hover:bg-surface hover:text-text-primary',
+                'hover:text-text-primary',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
               )}
             >

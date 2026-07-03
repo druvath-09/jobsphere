@@ -151,21 +151,9 @@ function Footer() {
                 )}
                 aria-hidden="true"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="h-5 w-5 text-white"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                  <path
-                    d="M8 12a4 4 0 0 1 8 0"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                </svg>
+                <span className="text-sm font-bold text-white" style={{ fontFamily: 'monospace' }}>
+                  {'</>'}
+                </span>
               </div>
 
               <span className="text-lg font-bold text-text-primary">
