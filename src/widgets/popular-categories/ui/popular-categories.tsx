@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { Container } from '@/shared/components/layout';
+import { getJobsPath } from '@/shared/constants/routes';
 
 /* ------------------------------------------------------------------ */
 /*  Icons                                                              */
@@ -79,18 +81,18 @@ interface Category {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   jobCount: number;
-  href: string;
+  query: string;
 }
 
 const CATEGORIES: Category[] = [
-  { label: 'Frontend',   icon: LayersIcon,       jobCount: 1240, href: '/jobs?cat=frontend' },
-  { label: 'Backend',    icon: ServerIcon,       jobCount: 1832, href: '/jobs?cat=backend' },
-  { label: 'Full Stack', icon: CodeBracketIcon,  jobCount: 978,  href: '/jobs?cat=fullstack' },
-  { label: 'AI & ML',    icon: CpuIcon,          jobCount: 543,  href: '/jobs?cat=ai' },
-  { label: 'Data',       icon: ChartIcon,        jobCount: 761,  href: '/jobs?cat=data' },
-  { label: 'Cloud',      icon: CloudIcon,        jobCount: 489,  href: '/jobs?cat=cloud' },
-  { label: 'DevOps',     icon: TerminalIcon,     jobCount: 412,  href: '/jobs?cat=devops' },
-  { label: 'Mobile',     icon: PhoneIcon,        jobCount: 334,  href: '/jobs?cat=mobile' },
+  { label: 'Frontend',   icon: LayersIcon,       jobCount: 1240, query: 'frontend' },
+  { label: 'Backend',    icon: ServerIcon,       jobCount: 1832, query: 'backend' },
+  { label: 'Full Stack', icon: CodeBracketIcon,  jobCount: 978,  query: 'full stack' },
+  { label: 'AI & ML',    icon: CpuIcon,          jobCount: 543,  query: 'ai' },
+  { label: 'Data',       icon: ChartIcon,        jobCount: 761,  query: 'data' },
+  { label: 'Cloud',      icon: CloudIcon,        jobCount: 489,  query: 'cloud' },
+  { label: 'DevOps',     icon: TerminalIcon,     jobCount: 412, query: 'devops' },
+  { label: 'Mobile',     icon: PhoneIcon,        jobCount: 334,  query: 'mobile' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -101,8 +103,8 @@ function CategoryCard({ category }: { category: Category }) {
   const Icon = category.icon;
 
   return (
-    <a
-      href={category.href}
+    <Link
+      to={getJobsPath(category.query)}
       className={cn(
         'group flex flex-col gap-3 rounded-xl border border-border bg-surface p-5',
         'transition-all duration-200',
@@ -121,7 +123,7 @@ function CategoryCard({ category }: { category: Category }) {
           {category.jobCount.toLocaleString()} jobs
         </p>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -153,8 +155,8 @@ function PopularCategories() {
               Explore roles by engineering discipline
             </p>
           </div>
-          <a
-            href="/jobs"
+          <Link
+            to="/jobs"
             className={cn(
               'hidden text-sm font-medium text-primary sm:block',
               'transition-colors duration-150 hover:text-primary/80',
@@ -163,7 +165,7 @@ function PopularCategories() {
             )}
           >
             View all →
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/components/ui';
 import { Container } from './container';
@@ -134,8 +135,8 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
       <Container as="div" padding="md" className="flex h-14 items-center justify-between">
 
         {/* ---- Logo ---- */}
-        <a
-          href="/"
+        <Link
+          to="/"
           className={cn(
             'flex items-center gap-2 rounded-md',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
@@ -153,14 +154,14 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
           <span className="text-base font-semibold text-text-primary tracking-tight">
             JobSphere
           </span>
-        </a>
+        </Link>
 
         {/* ---- Desktop Navigation ---- */}
         <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary navigation">
           {links.map((link) => (
-            <a
+            <Link
               key={link.href}
-              href={link.href}
+              to={link.href}
               className={cn(
                 'rounded-md px-3 py-1.5 text-sm font-medium text-text-secondary',
                 'transition-colors duration-150',
@@ -169,7 +170,7 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
               )}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -236,8 +237,8 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
             <ul className="flex flex-col gap-0.5" role="list">
               {links.map((link) => (
                 <li key={link.href}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className={cn(
                       'flex items-center rounded-md px-3 py-2.5 text-sm font-medium',
                       'text-text-secondary transition-colors duration-150',
@@ -247,7 +248,7 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
                     onClick={closeMobile}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

@@ -1,37 +1,28 @@
-import { useEffect, useState } from 'react';
 import { HomePage } from '@/pages/home';
 import { CompaniesPage } from '@/pages/companies';
+import { JobDetailsPage } from '@/pages/job-details';
 import { JobsPage } from '@/pages/jobs';
 import { ROUTES } from '@/shared/constants/routes';
-
-function getLocationKey() {
-	return typeof window === 'undefined'
-		? ROUTES.home
-		: `${window.location.pathname}${window.location.search}`;
-}
+import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom';
 
 function AppRouter() {
-	const [locationKey, setLocationKey] = useState(getLocationKey);
-	const pathname = locationKey.split('?')[0];
-
-	useEffect(() => {
-		function handlePopState() {
-			setLocationKey(`${window.location.pathname}${window.location.search}`);
-		}
-
-		window.addEventListener('popstate', handlePopState);
-		return () => window.removeEventListener('popstate', handlePopState);
-	}, []);
-
-	if (pathname === ROUTES.jobs) {
-		return <JobsPage />;
+	function JobDetailsRoute() {
+		const { jobId = '' } = useParams();
+		return <JobDetailsPage jobId={jobId} />;
 	}
 
-	if (pathname === ROUTES.companies) {
-		return <CompaniesPage />;
-	}
-
-	return <HomePage />;
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path={ROUTES.home} element={<HomePage />} />
+				<Route path={ROUTES.jobs} element={<JobsPage />} />
+				<Route path={`${ROUTES.jobs}/:jobId`} element={<JobDetailsRoute />} />
+				<Route path={ROUTES.companies} element={<CompaniesPage />} />
+				<Route path={`${ROUTES.companies}/:companyId`} element={<CompaniesPage />} />
+				<Route path="*" element={<HomePage />} />
+			</Routes>
+		</BrowserRouter>
+	);
 }
 
 export { AppRouter };

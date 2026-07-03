@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { Container } from '@/shared/components/layout';
 import { Button } from '@/shared/components/ui';
+import { getJobsPath } from '@/shared/constants/routes';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -74,20 +76,11 @@ function BuildingIcon({ className }: { className?: string }) {
  */
 function HeroSection() {
   const [searchQuery, setSearchQuery] = useState('');
-
-  function navigateTo(path: string) {
-    window.history.pushState({}, '', path);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  }
-
-  function getJobsPath(query: string) {
-    const normalizedQuery = query.trim();
-    return normalizedQuery ? `/jobs?q=${encodeURIComponent(normalizedQuery)}` : '/jobs';
-  }
+  const navigate = useNavigate();
 
   function handleSearch(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    navigateTo(getJobsPath(searchQuery));
+    navigate(getJobsPath(searchQuery));
   }
 
   return (
@@ -158,7 +151,7 @@ function HeroSection() {
                 size="md"
                 leftIcon={<BuildingIcon className="h-4 w-4" />}
                 className="flex-1 sm:flex-none"
-                onClick={() => navigateTo('/companies')}
+                onClick={() => navigate('/companies')}
               >
                 Browse Companies
               </Button>

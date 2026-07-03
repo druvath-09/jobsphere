@@ -1,6 +1,10 @@
+import { type KeyboardEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge, Button, Card } from '@/shared/components/ui';
 import { cn } from '@/shared/lib/utils';
 import type { JobListing } from '@/entities/job';
+import { CompanyLogoAvatar } from '@/entities/company';
+import { getJobDetailsPath } from '@/shared/constants/routes';
 
 function ClockIcon({ className }: { className?: string }) {
   return (
@@ -39,16 +43,35 @@ interface JobCardProps {
 }
 
 function JobCard({ job }: JobCardProps) {
+  const navigate = useNavigate();
+  const jobDetailState = { state: { fromJobSphere: true } };
+
+  function handleCardClick() {
+    navigate(getJobDetailsPath(job.id), jobDetailState);
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      navigate(getJobDetailsPath(job.id), jobDetailState);
+    }
+  }
+
   return (
-    <Card interactive className="flex h-full flex-col overflow-hidden">
+    <Card
+      interactive
+      role="link"
+      aria-label={`View details for ${job.title} at ${job.company}`}
+      className="flex h-full flex-col overflow-hidden cursor-pointer"
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+    >
       <div className="flex items-start gap-4 p-5 sm:p-6">
-        <div
+        <CompanyLogoAvatar
+          logo={{ path: job.companyLogo, initial: job.companyInitial, color: job.companyColor }}
+          fallbackInitial={job.companyInitial}
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold text-white shadow-sm"
-          style={{ backgroundColor: job.companyColor }}
-          aria-hidden="true"
-        >
-          {job.companyInitial}
-        </div>
+        />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

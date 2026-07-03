@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Atlassian logo placeholder" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0052CC"/>
+  <path d="M20 48c8-15 11-23 12-32 5 10 9 20 12 32h-8c-1-5-2-9-4-14-2 5-4 10-6 14h-6z" fill="#fff"/>
+  <path d="M15 48c5-10 8-18 10-26 3 5 5 10 7 15-2 4-4 8-6 11H15z" fill="#B3D4FF"/>
+</svg>

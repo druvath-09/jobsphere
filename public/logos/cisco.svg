@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cisco logo placeholder" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1BA0D7"/>
+  <g stroke="#fff" stroke-width="3" stroke-linecap="round">
+    <path d="M17 27v7"/><path d="M23 22v17"/><path d="M29 19v23"/><path d="M35 19v23"/><path d="M41 22v17"/><path d="M47 27v7"/>
+  </g>
+  <text x="32" y="52" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#fff">CISCO</text>
+</svg>

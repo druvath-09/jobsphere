@@ -2,17 +2,7 @@ import { Badge } from '@/shared/components/ui';
 import { Container, MainLayout } from '@/shared/components/layout';
 import { JobsListing } from '@/widgets/jobs-listing';
 
-function getInitialQuery() {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-
-  return new URLSearchParams(window.location.search).get('q') ?? '';
-}
-
 function JobsPage() {
-  const initialQuery = getInitialQuery();
-
   return (
     <MainLayout>
       <section className="border-b border-border bg-gradient-to-b from-surface to-background">
@@ -30,7 +20,7 @@ function JobsPage() {
         </Container>
       </section>
 
-      <JobsListing initialQuery={initialQuery} />
+      <JobsListing />
     </MainLayout>
   );
 }

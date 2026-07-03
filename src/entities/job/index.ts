@@ -5,4 +5,6 @@ export { JOB_LOCATION_OPTIONS } from './model/job';
 export { JOB_SALARY_OPTIONS } from './model/job';
 export { JOB_SORT_OPTIONS } from './model/job';
 export { filterJobs, sortJobs } from './model/job';
+export { getJobById, getJobDetails, getSimilarJobs } from './model/job-details';
 export type { JobFilters, JobListing, JobSortKey, JobEmploymentType, JobWorkMode } from './model/job';
+export type { JobDetails } from './model/job-details';

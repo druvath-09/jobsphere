@@ -1,0 +1,1 @@
+export { JobDetailsPage } from './ui/job-details-page';

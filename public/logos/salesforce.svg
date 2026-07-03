@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Salesforce logo placeholder" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#fff"/>
+  <path d="M24 42h21a10 10 0 0 0 1-20 13 13 0 0 0-24-5 10 10 0 0 0-3 19 8 8 0 0 0 5 6z" fill="#00A1E0"/>
+  <text x="34" y="35" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700" fill="#fff">SF</text>
+</svg>

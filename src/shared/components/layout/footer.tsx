@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { Container } from './container';
 
@@ -115,8 +116,8 @@ function Footer() {
 
           {/* ---- Brand Column ---- */}
           <div className="lg:col-span-2">
-            <a
-              href="/"
+            <Link
+              to="/"
               className={cn(
                 'inline-flex items-center gap-2 rounded-md',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
@@ -129,7 +130,7 @@ function Footer() {
                 </span>
               </div>
               <span className="text-sm font-semibold text-text-primary">JobSphere</span>
-            </a>
+            </Link>
 
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary">
               The modern platform for software engineers to discover verified
@@ -152,8 +153,8 @@ function Footer() {
               <ul className="flex flex-col gap-2" role="list">
                 {group.links.map((link) => (
                   <li key={link.href}>
-                    <a
-                      href={link.href}
+                    <Link
+                      to={link.href}
                       className={cn(
                         'text-sm text-text-secondary',
                         'transition-colors duration-150 hover:text-text-primary',
@@ -162,7 +163,7 @@ function Footer() {
                       )}
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -181,24 +182,24 @@ function Footer() {
             &copy; {currentYear} JobSphere, Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <a
-              href="/terms"
+            <Link
+              to="/terms"
               className="text-xs text-text-secondary transition-colors duration-150 hover:text-text-primary rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
             >
               Terms
-            </a>
-            <a
-              href="/privacy"
+            </Link>
+            <Link
+              to="/privacy"
               className="text-xs text-text-secondary transition-colors duration-150 hover:text-text-primary rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
             >
               Privacy
-            </a>
-            <a
-              href="/cookies"
+            </Link>
+            <Link
+              to="/cookies"
               className="text-xs text-text-secondary transition-colors duration-150 hover:text-text-primary rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
             >
               Cookies
-            </a>
+            </Link>
           </div>
         </Container>
       </div>
