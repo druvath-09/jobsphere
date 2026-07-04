@@ -130,6 +130,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => (
     <button
+      type={props.type || 'button'}
       className={cn(buttonVariants({ variant, size }), className)}
       ref={ref}
       disabled={disabled || loading}

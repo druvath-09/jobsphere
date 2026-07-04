@@ -3,12 +3,12 @@ import { cn } from '@/shared/lib/utils';
 
 interface Toast {
 	id: string;
-	message: string;
+	message: ReactNode;
 	type: 'success' | 'error' | 'info';
 }
 
 interface ToastContextType {
-	toast: (message: string, type?: 'success' | 'error' | 'info') => void;
+	toast: (message: ReactNode, type?: 'success' | 'error' | 'info') => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -16,7 +16,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export function ToastProvider({ children }: { children: ReactNode }) {
 	const [toasts, setToasts] = useState<Toast[]>([]);
 
-	const toast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+	const toast = useCallback((message: ReactNode, type: 'success' | 'error' | 'info' = 'success') => {
 		const id = Math.random().toString(36).substring(2, 9);
 		setToasts((prev) => [...prev, { id, message, type }]);
 

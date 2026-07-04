@@ -11,143 +11,188 @@ import type { SavedJob } from './saved-job';
 import { useAuth } from '@/features/auth';
 import { useNotifications } from '@/features/notifications';
 import { JOBS } from '@/entities/job';
+import { useToast } from '@/shared/components/ui/toast';
+import { Link } from 'react-router-dom';
+import { mockApi } from '@/shared/api/mockApi';
+import { LoginModal } from '@/widgets/auth-modal';
 
 export interface SavedJobsContextType {
 	savedJobs: SavedJob[];
 	savedJobIds: string[];
 	loading: boolean;
-	saveJob: (jobId: string) => void;
-	unsaveJob: (jobId: string) => void;
-	toggleSavedJob: (jobId: string) => void;
+	isSaving: boolean; // Legacy
+	savingJobId: string | null;
+	saveJob: (jobId: string) => Promise<void>;
+	unsaveJob: (jobId: string) => Promise<void>;
+	toggleSavedJob: (jobId: string) => Promise<void>;
 	isSaved: (jobId: string) => boolean;
 }
 
 const SavedJobsContext = createContext<SavedJobsContextType | null>(null);
 
-const STORAGE_KEY = 'jobsphere_saved_jobs';
-
 export function SavedJobsProvider({ children }: { children: ReactNode }) {
-	const [allSavedJobs, setAllSavedJobs] = useState<SavedJob[]>([]);
+	const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [savingJobId, setSavingJobId] = useState<string | null>(null);
+	const [pendingSaveJobId, setPendingSaveJobId] = useState<string | null>(null);
 	const { currentUser } = useAuth();
 	const { addNotification } = useNotifications();
+	const { toast } = useToast();
 
-	// Hydrate from localStorage on mount
-	useEffect(() => {
+	const fetchSavedJobs = useCallback(async () => {
+		if (!currentUser) {
+			setSavedJobIds([]);
+			setLoading(false);
+			return;
+		}
 		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			if (stored) {
-				const parsed = JSON.parse(stored) as SavedJob[];
-				if (Array.isArray(parsed)) {
-					setAllSavedJobs(parsed);
-				}
-			}
+			setLoading(true);
+			const ids = await mockApi.getSavedJobs(currentUser.id);
+			setSavedJobIds(ids);
 		} catch (error) {
-			console.error('Failed to parse saved jobs from localStorage', error);
+			console.error('Failed to fetch saved jobs', error);
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [currentUser]);
 
-	// Persist to localStorage whenever state changes
 	useEffect(() => {
-		if (!loading) {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(allSavedJobs));
-		}
-	}, [allSavedJobs, loading]);
+		fetchSavedJobs();
+		
+		const handleSync = () => fetchSavedJobs();
+		window.addEventListener('mock_db_updated', handleSync);
+		return () => window.removeEventListener('mock_db_updated', handleSync);
+	}, [fetchSavedJobs]);
 
-	// Expose only the current user's saved jobs
 	const savedJobs = useMemo(() => {
 		if (!currentUser) return [];
-		return allSavedJobs.filter((sj) => sj.userId === currentUser.id);
-	}, [allSavedJobs, currentUser]);
-
-	const saveJob = useCallback((jobId: string) => {
-		if (!currentUser) return;
-		
-		const jobDetails = JOBS.find((j: { id: string; title: string }) => j.id === jobId);
-		const jobTitle = jobDetails?.title || 'a job';
-		
-		setAllSavedJobs((prev) => {
-			if (prev.some((sj) => sj.jobId === jobId && sj.userId === currentUser.id)) return prev;
-			const newSavedJob: SavedJob = {
-				id: `saved-${Date.now()}-${jobId}`,
-				userId: currentUser.id,
-				jobId,
-				savedAt: new Date().toISOString(),
-			};
-			return [newSavedJob, ...prev]; // Prepend new saved jobs
-		});
-		
-		addNotification({
-			title: 'Job Saved',
-			message: `You saved ${jobTitle}.`,
-			type: 'info'
-		});
-	}, [currentUser, addNotification]);
-
-	const unsaveJob = useCallback((jobId: string) => {
-		if (!currentUser) return;
-		setAllSavedJobs((prev) => prev.filter((sj) => !(sj.jobId === jobId && sj.userId === currentUser.id)));
-	}, [currentUser]);
+		return savedJobIds.map(jobId => ({
+			id: `saved-${jobId}`,
+			userId: currentUser.id,
+			jobId,
+			savedAt: new Date().toISOString()
+		}));
+	}, [savedJobIds, currentUser]);
 
 	const isSaved = useCallback(
 		(jobId: string) => {
-			if (!currentUser) return false;
-			return savedJobs.some((sj) => sj.jobId === jobId);
+			return savedJobIds.includes(jobId);
 		},
-		[savedJobs, currentUser]
+		[savedJobIds]
 	);
 
-	const toggleSavedJob = useCallback(
-		(jobId: string) => {
-			if (!currentUser) return;
-			const jobDetails = JOBS.find((j: { id: string; title: string }) => j.id === jobId);
-			const jobTitle = jobDetails?.title || 'a job';
+	const saveJob = useCallback(async (jobId: string) => {
+		if (!currentUser) {
+			setPendingSaveJobId(jobId);
+			return;
+		}
+
+		if (isSaved(jobId)) {
+			return;
+		}
+
+		if (savingJobId === jobId) {
+			return;
+		}
+		
+		try {
+			setSavingJobId(jobId);
+			await mockApi.saveJob(currentUser.id, jobId);
+			await fetchSavedJobs();
 			
-			setAllSavedJobs((prev) => {
-				const exists = prev.some((sj) => sj.jobId === jobId && sj.userId === currentUser.id);
-				if (exists) {
-					return prev.filter((sj) => !(sj.jobId === jobId && sj.userId === currentUser.id));
-				} else {
-					const newSavedJob: SavedJob = {
-						id: `saved-${Date.now()}-${jobId}`,
-						userId: currentUser.id,
-						jobId,
-						savedAt: new Date().toISOString(),
-					};
-					return [newSavedJob, ...prev];
-				}
+			const jobDetails = JOBS.find((j: { id: string; title: string; company: string }) => j.id === jobId);
+			const jobTitle = jobDetails?.title || 'a job';
+			const companyName = jobDetails?.company || '';
+			
+			addNotification({
+				title: 'Job Saved',
+				message: `You saved ${jobTitle} at ${companyName}.`,
+				type: 'info'
 			});
 			
-			// If we are saving (not unsaving), trigger notification
-			if (!isSaved(jobId)) {
-				addNotification({
-					title: 'Job Saved',
-					message: `You saved ${jobTitle}.`,
-					type: 'info'
-				});
+			toast(
+				<div className="flex flex-col gap-1">
+					<span className="font-medium">⭐ Job Saved</span>
+					<span className="text-sm font-medium">{jobTitle}</span>
+					{companyName && <span className="text-sm text-text-secondary">{companyName}</span>}
+					<Link to="/saved-jobs" className="text-primary hover:underline text-sm font-semibold mt-1 w-fit">
+						View Saved Jobs →
+					</Link>
+				</div>,
+				'success'
+			);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setSavingJobId(null);
+		}
+	}, [currentUser, isSaved, savingJobId, fetchSavedJobs, addNotification, toast]);
+
+	// Auto-save if there's a pending job ID and the user logs in
+	useEffect(() => {
+		if (currentUser && pendingSaveJobId) {
+			saveJob(pendingSaveJobId);
+			setPendingSaveJobId(null);
+		}
+	}, [currentUser, pendingSaveJobId, saveJob]);
+
+	const unsaveJob = useCallback(async (jobId: string) => {
+		if (!currentUser) return;
+		if (!isSaved(jobId)) return;
+		if (savingJobId === jobId) return;
+
+		try {
+			setSavingJobId(jobId);
+			await mockApi.unsaveJob(currentUser.id, jobId);
+			await fetchSavedJobs();
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setSavingJobId(null);
+		}
+	}, [currentUser, isSaved, savingJobId, fetchSavedJobs]);
+
+	const toggleSavedJob = useCallback(
+		async (jobId: string) => {
+			if (!currentUser) {
+				setPendingSaveJobId(jobId);
+				return;
+			}
+			if (savingJobId === jobId) return;
+
+			if (isSaved(jobId)) {
+				await unsaveJob(jobId);
+			} else {
+				await saveJob(jobId);
 			}
 		},
-		[currentUser, addNotification, isSaved]
+		[currentUser, isSaved, savingJobId, saveJob, unsaveJob]
 	);
-
-	const savedJobIds = useMemo(() => savedJobs.map((sj) => sj.jobId), [savedJobs]);
 
 	const value = useMemo(
 		() => ({
 			savedJobs,
 			savedJobIds,
 			loading,
+			isSaving: false, // Legacy
+			savingJobId,
 			saveJob,
 			unsaveJob,
 			toggleSavedJob,
 			isSaved,
 		}),
-		[savedJobs, savedJobIds, loading, saveJob, unsaveJob, toggleSavedJob, isSaved]
+		[savedJobs, savedJobIds, loading, savingJobId, saveJob, unsaveJob, toggleSavedJob, isSaved]
 	);
 
-	return <SavedJobsContext.Provider value={value}>{children}</SavedJobsContext.Provider>;
+	return (
+		<SavedJobsContext.Provider value={value}>
+			{children}
+			<LoginModal 
+				isOpen={!!pendingSaveJobId} 
+				onClose={() => setPendingSaveJobId(null)} 
+			/>
+		</SavedJobsContext.Provider>
+	);
 }
 
 export function useSavedJobs() {

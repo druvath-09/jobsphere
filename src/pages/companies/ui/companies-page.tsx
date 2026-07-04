@@ -5,7 +5,6 @@ import { Container, MainLayout } from '@/shared/components/layout';
 import { Input } from '@/shared/components/ui';
 import { COMPANIES, CompanyLogoAvatar, getCompanyBySlug, getCompanyJobs } from '@/entities/company';
 import { CompaniesListing } from '@/widgets/companies-listing';
-import { getCompanyDetailsPath } from '@/shared/constants/routes';
 
 function BackIcon({ className }: { className?: string }) {
   return (
@@ -82,17 +81,28 @@ function CompaniesHero() {
   );
 }
 
-function CompanyDetailPlaceholder({ companyId }: { companyId: string }) {
+import { JobCard } from '@/widgets/jobs-listing/ui/job-card';
+
+function CompanyDetail({ companyId }: { companyId: string }) {
   const navigate = useNavigate();
   const company = getCompanyBySlug(companyId);
   const companyJobs = company ? getCompanyJobs(company.id) : [];
-  const title = company?.name ?? 'Company profile';
-  const description = company
-    ? 'This is a temporary company profile placeholder while the full company details experience is being built.'
-    : 'This company profile is not available yet, but the route is in place and linked from the Companies module.';
+
+  if (!company) {
+    return (
+      <section className="py-20 text-center">
+        <Container padding="md">
+          <h1 className="text-2xl font-bold">Company not found</h1>
+          <Button variant="primary" className="mt-6" onClick={() => navigate('/companies')}>
+            Back to Companies
+          </Button>
+        </Container>
+      </section>
+    );
+  }
 
   return (
-    <section className="py-10 sm:py-12">
+    <section className="py-10 sm:py-12 bg-surface-hover/30 min-h-screen">
       <Container padding="md">
         <div className="mb-6 flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" leftIcon={<BackIcon className="h-4 w-4" />} onClick={() => navigate('/companies')}>
@@ -100,77 +110,96 @@ function CompanyDetailPlaceholder({ companyId }: { companyId: string }) {
           </Button>
         </div>
 
-        <Card className="mx-auto max-w-3xl">
-          <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              <CompanyLogoAvatar
-                logo={company?.logo}
-                fallbackInitial={(company?.logo.initial ?? title.charAt(0)) || 'C'}
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold text-white shadow-sm"
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <Card className="overflow-hidden border-border/60">
+              <div className="h-32 w-full bg-gradient-to-r from-primary/10 to-accent/10"></div>
+              <CardContent className="p-6 sm:p-8 relative">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                  <CompanyLogoAvatar
+                    logo={company.logo}
+                    fallbackInitial={company.logo.initial || 'C'}
+                    className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white shadow-sm ring-4 ring-surface absolute -top-10"
+                  />
 
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">{title}</h1>
-                  {company?.verified && (
-                    <Badge variant="success" className="inline-flex items-center gap-1">
-                      <VerifiedIcon className="h-3.5 w-3.5" />
-                      Verified
-                    </Badge>
-                  )}
+                  <div className="min-w-0 flex-1 mt-10 sm:mt-0 sm:ml-24">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h1 className="text-3xl font-bold tracking-tight text-text-primary">{company.name}</h1>
+                      {company.verified && (
+                        <Badge variant="success" className="inline-flex items-center gap-1 shadow-sm">
+                          <VerifiedIcon className="h-3.5 w-3.5" />
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="mt-2 text-text-secondary text-sm flex items-center gap-2">
+                      {company.industry} • {company.location} • <a href={company.website} target="_blank" rel="noreferrer" className="text-primary hover:underline">{new URL(company.website).hostname}</a>
+                    </p>
+                  </div>
                 </div>
 
-                <p className="mt-3 text-sm leading-7 text-text-secondary">{description}</p>
-
-                {company && (
-                  <dl className="mt-6 grid gap-4 text-sm text-text-secondary sm:grid-cols-2">
-                    <div>
-                      <dt className="font-medium text-text-primary">Industry</dt>
-                      <dd className="mt-1">{company.industry}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-text-primary">Headquarters</dt>
-                      <dd className="mt-1">{company.headquarters}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-text-primary">Company size</dt>
-                      <dd className="mt-1">{company.size} employees</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-text-primary">Open positions</dt>
-                      <dd className="mt-1">{companyJobs.length}</dd>
-                    </div>
-                  </dl>
-                )}
-
-                {company && (
-                  <div className="mt-6">
-                    <p className="text-sm font-medium text-text-primary">Technologies used</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {company.technologies.map((technology) => (
-                        <Badge key={technology} variant="outline">
-                          {technology}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {!company && (
-                  <p className="mt-6 text-sm text-text-secondary">
-                    The Companies listing still works and this placeholder route is ready for future company pages.
+                <div className="mt-8">
+                  <h3 className="text-lg font-bold text-text-primary mb-3">About {company.name}</h3>
+                  <p className="text-sm leading-relaxed text-text-secondary">
+                    {company.description}
                   </p>
-                )}
+                </div>
 
-                {company && (
-                  <div className="mt-6 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                    {getCompanyDetailsPath(company.slug)}
+                <div className="mt-8">
+                  <h3 className="text-lg font-bold text-text-primary mb-3">Tech Stack</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {company.technologies.map((tech) => (
+                      <Badge key={tech} variant="outline" className="bg-surface">
+                        {tech}
+                      </Badge>
+                    ))}
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div>
+              <h2 className="text-xl font-bold text-text-primary mb-4">Jobs at {company.name}</h2>
+              <div className="grid gap-4">
+                {companyJobs.length > 0 ? (
+                  companyJobs.map(job => <JobCard key={job.id} job={job} />)
+                ) : (
+                  <Card>
+                    <CardContent className="p-8 text-center text-text-secondary">
+                      No open positions at the moment.
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <Card className="border-border/60 sticky top-20">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-text-primary mb-4">Company Overview</h3>
+                <dl className="grid gap-4 text-sm">
+                  <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
+                    <dt className="text-text-secondary">Founded</dt>
+                    <dd className="font-medium text-text-primary">{company.founded}</dd>
+                  </div>
+                  <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
+                    <dt className="text-text-secondary">Company Size</dt>
+                    <dd className="font-medium text-text-primary">{company.size} employees</dd>
+                  </div>
+                  <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
+                    <dt className="text-text-secondary">Headquarters</dt>
+                    <dd className="font-medium text-text-primary">{company.headquarters}</dd>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <dt className="text-text-secondary">Open Roles</dt>
+                    <dd className="font-medium text-text-primary">{companyJobs.length} positions</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </Container>
     </section>
   );
@@ -181,7 +210,7 @@ function CompaniesPage() {
 
   return (
     <MainLayout navbarProps={{ authSlot: <NavbarAuth /> }}>
-      {companyId ? <CompanyDetailPlaceholder companyId={companyId} /> : <CompaniesHero />}
+      {companyId ? <CompanyDetail companyId={companyId} /> : <CompaniesHero />}
       {!companyId && <CompaniesListing />}
     </MainLayout>
   );

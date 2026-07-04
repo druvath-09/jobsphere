@@ -1,5 +1,6 @@
 import { JOBS, type JobListing } from '@/entities/job';
 import { useSavedJobs } from '@/entities/saved-job';
+import { useApplications } from '@/entities/application';
 import { CompanyLogoAvatar } from '@/entities/company';
 import { Card, Badge, Button } from '@/shared/components/ui';
 import { cn } from '@/shared/lib/utils';
@@ -9,6 +10,24 @@ import { useNavigate } from 'react-router-dom';
 /* ------------------------------------------------------------------ */
 /*  Icons                                                              */
 /* ------------------------------------------------------------------ */
+
+function ZapIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+  );
+}
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <polyline points="15 3 21 3 21 9"></polyline>
+      <line x1="10" y1="14" x2="21" y2="3"></line>
+    </svg>
+  );
+}
 
 function MapPinIcon({ className }: { className?: string }) {
 	return (
@@ -52,8 +71,18 @@ function workModeBadgeVariant(mode: JobListing['workMode']) {
 
 function DashboardJobCard({ job }: { job: JobListing }) {
 	const navigate = useNavigate();
-	const { isSaved, toggleSavedJob } = useSavedJobs();
+	const { isSaved, toggleSavedJob, savingJobId } = useSavedJobs();
+	const { applyToJob, applyingJobId, isApplied } = useApplications();
 	const saved = isSaved(job.id);
+	const hasApplied = isApplied(job.id);
+	const isSaving = savingJobId === job.id;
+	const isApplying = applyingJobId === job.id;
+	
+	const handleApply = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		applyToJob(job.id);
+	};
 
 	return (
 		<Card
@@ -116,17 +145,27 @@ function DashboardJobCard({ job }: { job: JobListing }) {
 			</div>
 
 			<div className="flex shrink-0 items-center gap-2 sm:flex-col sm:items-end">
-				<Button
-					variant="primary"
-					size="sm"
-					className="flex-1 justify-center sm:flex-none"
-					onClick={(e) => {
-						e.stopPropagation();
-						navigate(getJobDetailsPath(job.id));
-					}}
-				>
-					Apply Now
-				</Button>
+				{hasApplied ? (
+					<Button variant="secondary" size="sm" className="flex-1 justify-center sm:flex-none" disabled>
+						Applied ✓
+					</Button>
+				) : (
+					<Button variant="primary" size="sm" className="flex-1 justify-center sm:flex-none" onClick={handleApply} disabled={isApplying}>
+						{isApplying ? (
+							<span className="flex items-center gap-1">
+								<svg className="animate-spin h-3 w-3 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Applying
+							</span>
+						) : job.easyApply ? (
+							<span className="flex items-center gap-1">
+								<ZapIcon className="h-3 w-3" /> Easy Apply
+							</span>
+						) : (
+							<span className="flex items-center gap-1">
+								Apply <ExternalLinkIcon className="h-3 w-3" />
+							</span>
+						)}
+					</Button>
+				)}
 				<button
 					type="button"
 					aria-label={saved ? `Unsave ${job.title} at ${job.company}` : `Save ${job.title} at ${job.company}`}
@@ -136,13 +175,16 @@ function DashboardJobCard({ job }: { job: JobListing }) {
 							? 'border-primary text-primary bg-primary/5 hover:bg-primary/10'
 							: 'border-border bg-surface text-text-secondary hover:border-primary/40 hover:text-primary',
 						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+						isSaving && 'opacity-50 cursor-not-allowed pointer-events-none'
 					)}
 					onClick={(e) => {
+						e.preventDefault();
 						e.stopPropagation();
 						toggleSavedJob(job.id);
 					}}
+					disabled={isSaving}
 				>
-					<BookmarkIcon className="h-3.5 w-3.5" filled={saved} />
+					{isSaving ? <svg className="animate-spin h-3 w-3 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> : <BookmarkIcon className="h-3.5 w-3.5" filled={saved} />}
 				</button>
 			</div>
 		</Card>

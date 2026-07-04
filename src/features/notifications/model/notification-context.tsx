@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useAuth } from '@/features/auth';
 import type { AppNotification, NotificationContextState } from './notification';
-import { getNotifications, saveNotifications } from './notification-storage';
+import { mockApi } from '@/shared/api/mockApi';
 
 const NotificationContext = createContext<NotificationContextState | undefined>(undefined);
 
@@ -9,56 +9,56 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 	const { currentUser, isAuthenticated } = useAuth();
 	const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
-	// Hydrate on mount or user change
-	useEffect(() => {
+	const fetchNotifications = useCallback(async () => {
 		if (isAuthenticated && currentUser) {
-			const allNotifs = getNotifications();
-			const userNotifs = allNotifs.filter((n) => n.userId === currentUser.id);
-			// Sort newest first
-			setNotifications(userNotifs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+			try {
+				const notifs = await mockApi.getNotifications(currentUser.id);
+				setNotifications(notifs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+			} catch (e) {
+				console.error(e);
+			}
 		} else {
 			setNotifications([]);
 		}
 	}, [currentUser, isAuthenticated]);
 
+	useEffect(() => {
+		fetchNotifications();
+		
+		const handleSync = () => fetchNotifications();
+		window.addEventListener('mock_db_updated', handleSync);
+		return () => window.removeEventListener('mock_db_updated', handleSync);
+	}, [fetchNotifications]);
+
 	const addNotification = useCallback(
-		(notif: Omit<AppNotification, 'id' | 'read' | 'createdAt' | 'userId'>) => {
+		async (notif: Omit<AppNotification, 'id' | 'read' | 'createdAt' | 'userId'>) => {
 			if (!currentUser) return;
-			const newNotif: AppNotification = {
-				...notif,
-				id: crypto.randomUUID(),
-				userId: currentUser.id,
-				read: false,
-				createdAt: new Date().toISOString(),
-			};
-
-			const allNotifs = getNotifications();
-			saveNotifications([...allNotifs, newNotif]);
-
-			setNotifications((prev) => [newNotif, ...prev]);
+			await mockApi.addNotification(currentUser.id, notif.title, notif.message, notif.type);
+			await fetchNotifications();
 		},
-		[currentUser]
+		[currentUser, fetchNotifications]
 	);
 
-	const markAsRead = useCallback((id: string) => {
-		setNotifications((prev) =>
-			prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-		);
-		const allNotifs = getNotifications();
-		saveNotifications(
-			allNotifs.map((n) => (n.id === id ? { ...n, read: true } : n))
-		);
-	}, []);
+	const markAsRead = useCallback(async (id: string) => {
+		await mockApi.markNotificationRead(id);
+		await fetchNotifications();
+	}, [fetchNotifications]);
 
-	const markAllAsRead = useCallback(() => {
+	const markAllAsRead = useCallback(async () => {
 		if (!currentUser) return;
-		setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-		
-		const allNotifs = getNotifications();
-		saveNotifications(
-			allNotifs.map((n) => (n.userId === currentUser.id ? { ...n, read: true } : n))
-		);
-	}, [currentUser]);
+		for (const n of notifications) {
+			if (!n.read) {
+				await mockApi.markNotificationRead(n.id);
+			}
+		}
+		await fetchNotifications();
+	}, [currentUser, notifications, fetchNotifications]);
+
+	const clearAll = useCallback(async () => {
+		if (!currentUser) return;
+		await mockApi.clearAllNotifications(currentUser.id);
+		await fetchNotifications();
+	}, [currentUser, fetchNotifications]);
 
 	const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -70,6 +70,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 				addNotification,
 				markAsRead,
 				markAllAsRead,
+				clearAll,
 			}}
 		>
 			{children}

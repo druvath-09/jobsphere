@@ -24,15 +24,16 @@ export function NotificationsPage() {
 
 					<div className="flex flex-col gap-4">
 						{notifications.length === 0 ? (
-							<Card>
-								<CardContent className="flex flex-col items-center justify-center py-16 text-center">
-									<div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-hover mb-4 text-text-secondary">
-										<svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-											<path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+							<Card className="overflow-hidden border-border/60">
+								<div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none opacity-50"></div>
+								<CardContent className="flex flex-col items-center justify-center py-16 text-center relative z-10">
+									<div className="flex h-20 w-20 items-center justify-center rounded-full bg-surface shadow-sm border border-border text-primary mb-5">
+										<svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+											<path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
 										</svg>
 									</div>
-									<h3 className="text-lg font-medium text-text-primary">No notifications yet</h3>
-									<p className="mt-1 text-sm text-text-secondary">We'll notify you when something important happens.</p>
+									<h3 className="text-xl font-bold text-text-primary mb-2">You're all caught up!</h3>
+									<p className="mt-1 text-sm text-text-secondary max-w-sm">We'll notify you when employers review your applications, send interview requests, or when similar jobs are posted.</p>
 								</CardContent>
 							</Card>
 						) : (

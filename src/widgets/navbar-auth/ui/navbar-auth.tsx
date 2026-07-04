@@ -3,15 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/features/auth';
 import { useProfile } from '@/features/profile';
-import { useNotifications } from '@/features/notifications';
 import { ROUTES } from '@/shared/constants/routes';
 import { Button } from '@/shared/components/ui';
 import { Link, useNavigate } from 'react-router-dom';
+import { NotificationDropdown } from './notification-dropdown';
 
 function NavbarAuth() {
 	const { currentUser, isAuthenticated, logout } = useAuth();
 	const { completion } = useProfile();
-	const { unreadCount } = useNotifications();
 	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
@@ -73,7 +72,9 @@ function NavbarAuth() {
 		};
 
 		return (
-			<div className="relative flex items-center" ref={dropdownRef}>
+			<div className="flex items-center gap-2">
+				<NotificationDropdown />
+				<div className="relative flex items-center" ref={dropdownRef}>
 				<button
 					type="button"
 					onClick={() => setIsOpen(!isOpen)}
@@ -153,12 +154,6 @@ function NavbarAuth() {
 								label="Applications" 
 							/>
 							<MenuItem 
-								to={ROUTES.notifications}
-								icon={<svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>} 
-								label="Notifications" 
-								badge={unreadCount > 0 ? <span className="flex h-5 w-5 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white">{unreadCount}</span> : undefined}
-							/>
-							<MenuItem 
 								icon={<svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>} 
 								label="Settings" 
 							/>
@@ -195,6 +190,7 @@ function NavbarAuth() {
 						</div>
 					</div>
 				)}
+				</div>
 			</div>
 		);
 	}
@@ -202,12 +198,12 @@ function NavbarAuth() {
 	return (
 		<>
 			<Link to={ROUTES.login}>
-				<Button variant="ghost" size="sm" className="text-text-secondary font-medium">
+				<Button variant="ghost" size="sm" className="text-text-secondary font-medium hover:text-text-primary hover:bg-surface-hover/50 transition-colors">
 					Login
 				</Button>
 			</Link>
 			<Link to={ROUTES.register}>
-				<Button variant="primary" size="sm">
+				<Button variant="primary" size="sm" className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 font-medium">
 					Register
 				</Button>
 			</Link>

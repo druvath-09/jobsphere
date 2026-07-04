@@ -45,10 +45,11 @@ export const APPLICATION_MOCKS: ApplicationMock[] = [
 	},
 ];
 
-export function resolveApplication(app: ApplicationMock): Application {
+export function resolveApplication(app: ApplicationMock): Application | null {
 	const job = getJobById(app.jobId);
 	if (!job) {
-		throw new Error(`Job "${app.jobId}" not found for application "${app.id}"`);
+		console.warn(`Job "${app.jobId}" not found for application "${app.id}". This application will be ignored.`);
+		return null;
 	}
 	return {
 		...app,

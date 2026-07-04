@@ -25,9 +25,6 @@ function buildPageWindow(currentPage: number, totalPages: number) {
 function JobsPagination({
   currentPage,
   totalPages,
-  totalResults,
-  startIndex,
-  endIndex,
   onPageChange,
 }: JobsPaginationProps) {
   const pageWindow = buildPageWindow(currentPage, totalPages);
@@ -35,21 +32,11 @@ function JobsPagination({
   const lastPageInWindow = pageWindow[pageWindow.length - 1];
 
   if (totalPages <= 1) {
-    return (
-      <div className="mt-8 flex flex-col gap-3 border-t border-border pt-5 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          Showing {totalResults === 0 ? 0 : startIndex + 1}-{endIndex + 1} of {totalResults} jobs
-        </p>
-        <p>Page 1 of 1</p>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-text-secondary">
-        Showing {startIndex + 1}-{endIndex + 1} of {totalResults} jobs
-      </p>
+    <div className="flex items-center justify-center pt-2">
 
       <div className="flex flex-wrap items-center gap-2">
         <Button

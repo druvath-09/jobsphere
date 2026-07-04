@@ -18,7 +18,7 @@ function JobsControls({ filters, onChange }: JobsControlsProps) {
   return (
     <Container padding="md" className="mt-6">
       <div className="rounded-3xl border border-border bg-surface p-4 shadow-sm sm:p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))]">
           <Input
             label="Search"
             placeholder="Role, company, skill, or keyword"

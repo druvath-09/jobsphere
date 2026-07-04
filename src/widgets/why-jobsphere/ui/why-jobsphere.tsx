@@ -65,35 +65,42 @@ function WhyJobSphere() {
   return (
     <section
       aria-labelledby="why-heading"
-      className="border-t border-border bg-surface py-12 sm:py-16"
+      className="border-t border-border bg-surface py-20 sm:py-28 overflow-hidden"
     >
       <Container padding="md">
 
-        <div className="mb-10">
+        <div className="mb-16 max-w-2xl">
           <h2
             id="why-heading"
-            className="text-xl font-semibold text-text-primary"
+            className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl"
           >
             Why engineers choose JobSphere
           </h2>
-          <p className="mt-1 text-sm text-text-secondary">
-            Built specifically for software engineers and technical roles.
+          <p className="mt-4 text-lg text-text-secondary leading-relaxed">
+            Built specifically for software engineers and technical roles. 
+            We focus on transparency, speed, and quality.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (
-              <div key={feature.title} className="flex flex-col gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-4.5 w-4.5 text-primary" />
+              <div 
+                key={feature.title} 
+                className="group relative flex flex-col gap-4 rounded-2xl border border-border/60 bg-gradient-to-b from-surface to-background p-8 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-primary/20 overflow-hidden"
+              >
+                {/* Subtle background glow on hover */}
+                <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-primary/5 blur-3xl transition-opacity duration-300 group-hover:opacity-100 opacity-0 pointer-events-none" />
+                
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                  <Icon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-text-primary">
+                  <h3 className="text-xl font-bold text-text-primary mb-2">
                     {feature.title}
                   </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">
+                  <p className="text-base leading-relaxed text-text-secondary">
                     {feature.description}
                   </p>
                 </div>

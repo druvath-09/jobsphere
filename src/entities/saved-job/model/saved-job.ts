@@ -22,10 +22,11 @@ export interface ResolvedSavedJob extends SavedJob {
  * Resolves a SavedJob into a ResolvedSavedJob by looking up the job details.
  * Throws an error if the job cannot be found (which in a real app might happen if a job is deleted).
  */
-export function resolveSavedJob(savedJob: SavedJob): ResolvedSavedJob {
+export function resolveSavedJob(savedJob: SavedJob): ResolvedSavedJob | null {
 	const job = getJobById(savedJob.jobId);
 	if (!job) {
-		throw new Error(`Job "${savedJob.jobId}" not found for saved job "${savedJob.id}".`);
+		console.warn(`Job "${savedJob.jobId}" not found for saved job "${savedJob.id}". This saved job will be ignored.`);
+		return null;
 	}
 	return {
 		...savedJob,

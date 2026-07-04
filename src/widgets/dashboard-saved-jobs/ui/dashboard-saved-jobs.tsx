@@ -12,6 +12,8 @@ function DashboardSavedJobs() {
 	const recentSavedJobs = savedJobs
 		.slice(0, 5)
 		.map(resolveSavedJob)
+		.filter((sj): sj is import('@/entities/saved-job').ResolvedSavedJob => sj !== null)
+		.slice(0, 3)
 		.map(sj => sj.job);
 
 	return (

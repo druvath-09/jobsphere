@@ -7,9 +7,9 @@ export interface UserRecord extends User {
 
 const DEFAULT_SEED_USER: UserRecord = {
 	id: '1',
-	fullName: 'John Doe',
-	email: 'john@example.com',
-	password: 'Password@123',
+	fullName: 'Demo User',
+	email: 'demo@jobsphere.dev',
+	password: 'password123',
 };
 
 /**

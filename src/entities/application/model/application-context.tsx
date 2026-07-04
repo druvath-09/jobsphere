@@ -8,100 +8,74 @@ import {
 	type ReactNode,
 } from 'react';
 import type { Application, ApplicationMock } from './application';
-import { resolveApplication, APPLICATION_MOCKS } from './application';
+import { resolveApplication } from './application';
 import { useAuth } from '@/features/auth';
+import { mockApi } from '@/shared/api/mockApi';
 import { useNotifications } from '@/features/notifications';
+import { useToast } from '@/shared/components/ui/toast';
+import { Link } from 'react-router-dom';
+import { LoginModal } from '@/widgets/auth-modal';
 
 export interface ApplicationContextType {
 	applications: Application[];
 	recentApplications: Application[];
 	loading: boolean;
-	applyToJob: (jobId: string) => void;
-	withdrawApplication: (jobId: string) => void;
+	isApplying: boolean; // Legacy
+	applyingJobId: string | null;
+	applyToJob: (jobId: string) => Promise<void>;
+	withdrawApplication: (jobId: string) => Promise<void>;
 	isApplied: (jobId: string) => boolean;
 	getApplication: (jobId: string) => Application | undefined;
 }
 
 const ApplicationContext = createContext<ApplicationContextType | null>(null);
 
-const STORAGE_KEY = 'jobsphere_applications';
-
 export function ApplicationProvider({ children }: { children: ReactNode }) {
 	const [allApplications, setAllApplications] = useState<ApplicationMock[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [pendingApplyJobId, setPendingApplyJobId] = useState<string | null>(null);
+	const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
 	const { currentUser } = useAuth();
 	const { addNotification } = useNotifications();
+	const { toast } = useToast();
 
-	// Hydrate from localStorage on mount
-	useEffect(() => {
+	const fetchApplications = useCallback(async () => {
+		if (!currentUser) {
+			setAllApplications([]);
+			setLoading(false);
+			return;
+		}
 		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			if (stored) {
-				const parsed = JSON.parse(stored) as ApplicationMock[];
-				if (Array.isArray(parsed)) {
-					setAllApplications(parsed);
-				}
-			} else {
-				setAllApplications(APPLICATION_MOCKS);
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(APPLICATION_MOCKS));
-			}
+			setLoading(true);
+			const data = await mockApi.getApplications(currentUser.id);
+			setAllApplications(data);
 		} catch (error) {
-			console.error('Failed to parse applications from localStorage', error);
-			setAllApplications(APPLICATION_MOCKS);
+			console.error('Failed to fetch applications', error);
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [currentUser]);
 
-	// Persist to localStorage whenever state changes
 	useEffect(() => {
-		if (!loading) {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(allApplications));
-		}
-	}, [allApplications, loading]);
+		fetchApplications();
+		
+		// Sync across tabs or providers
+		const handleSync = () => fetchApplications();
+		window.addEventListener('mock_db_updated', handleSync);
+		return () => window.removeEventListener('mock_db_updated', handleSync);
+	}, [fetchApplications]);
 
-	// Expose only the current user's applications
 	const applications = useMemo(() => {
 		if (!currentUser) return [];
 		return allApplications
-			.filter((app) => app.userId === currentUser.id)
 			.map(resolveApplication)
+			.filter((app): app is Application => app !== null)
 			.sort((a, b) => new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime());
 	}, [allApplications, currentUser]);
 
 	const recentApplications = useMemo(() => {
 		return applications.slice(0, 4);
 	}, [applications]);
-
-	const applyToJob = useCallback((jobId: string) => {
-		if (!currentUser) return;
-		
-		const jobDetails = resolveApplication({ id: '', userId: '', jobId, status: 'Applied', appliedDate: '' });
-		const jobTitle = jobDetails?.job?.title || 'a job';
-		
-		setAllApplications((prev) => {
-			if (prev.some((app) => app.jobId === jobId && app.userId === currentUser.id)) return prev;
-			const newApp: ApplicationMock = {
-				id: `app-${Date.now()}-${jobId}`,
-				userId: currentUser.id,
-				jobId,
-				status: 'Applied',
-				appliedDate: new Date().toISOString(),
-			};
-			return [newApp, ...prev];
-		});
-		
-		addNotification({
-			title: 'Application Submitted',
-			message: `You have successfully applied to ${jobTitle}.`,
-			type: 'success'
-		});
-	}, [currentUser, addNotification]);
-
-	const withdrawApplication = useCallback((jobId: string) => {
-		if (!currentUser) return;
-		setAllApplications((prev) => prev.filter((app) => !(app.jobId === jobId && app.userId === currentUser.id)));
-	}, [currentUser]);
 
 	const isApplied = useCallback(
 		(jobId: string) => {
@@ -110,6 +84,73 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
 		},
 		[applications, currentUser]
 	);
+
+	const applyToJob = useCallback(async (jobId: string) => {
+		if (!currentUser) {
+			setPendingApplyJobId(jobId);
+			return;
+		}
+
+		if (isApplied(jobId)) {
+			return;
+		}
+
+		if (applyingJobId === jobId) {
+			return;
+		}
+		
+		try {
+			setApplyingJobId(jobId);
+			await mockApi.applyJob(currentUser.id, jobId);
+			
+			// Job Title for Toast
+			const jobDetails = resolveApplication({ id: '', userId: '', jobId, status: 'Applied', appliedDate: '' });
+			const jobTitle = jobDetails?.job?.title || 'a job';
+			const companyName = jobDetails?.job?.company || '';
+			
+			await fetchApplications();
+			
+			addNotification({
+				title: 'Application Submitted',
+				message: `You have successfully applied to ${jobTitle} at ${companyName}.`,
+				type: 'success'
+			});
+			
+			toast(
+				<div className="flex flex-col gap-1">
+					<span className="font-medium">✅ Application Submitted</span>
+					<span className="text-sm font-medium">{jobTitle}</span>
+					{companyName && <span className="text-sm text-text-secondary">{companyName}</span>}
+					<Link to="/applications" className="text-primary hover:underline text-sm font-semibold mt-1 w-fit">
+						View Applications →
+					</Link>
+				</div>,
+				'success'
+			);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setApplyingJobId(null);
+		}
+	}, [currentUser, isApplied, applyingJobId, addNotification, toast, fetchApplications]);
+
+	// Auto-apply if there's a pending job ID and the user logs in
+	useEffect(() => {
+		if (currentUser && pendingApplyJobId) {
+			applyToJob(pendingApplyJobId);
+			setPendingApplyJobId(null);
+		}
+	}, [currentUser, pendingApplyJobId, applyToJob]);
+
+	const withdrawApplication = useCallback(async (jobId: string) => {
+		if (!currentUser) return;
+		try {
+			await mockApi.withdrawApplication(currentUser.id, jobId);
+			await fetchApplications();
+		} catch (e) {
+			console.error(e);
+		}
+	}, [currentUser, fetchApplications]);
 
 	const getApplication = useCallback(
 		(jobId: string) => {
@@ -124,15 +165,25 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
 			applications,
 			recentApplications,
 			loading,
+			isApplying: false, // Legacy compatibility, not strictly needed if we update all
+			applyingJobId,
 			applyToJob,
 			withdrawApplication,
 			isApplied,
 			getApplication,
 		}),
-		[applications, recentApplications, loading, applyToJob, withdrawApplication, isApplied, getApplication]
+		[applications, recentApplications, loading, applyingJobId, applyToJob, withdrawApplication, isApplied, getApplication]
 	);
 
-	return <ApplicationContext.Provider value={value}>{children}</ApplicationContext.Provider>;
+	return (
+		<ApplicationContext.Provider value={value}>
+			{children}
+			<LoginModal 
+				isOpen={!!pendingApplyJobId} 
+				onClose={() => setPendingApplyJobId(null)} 
+			/>
+		</ApplicationContext.Provider>
+	);
 }
 
 export function useApplications() {

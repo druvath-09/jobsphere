@@ -3,7 +3,7 @@ export interface AppNotification {
 	userId: string;
 	title: string;
 	message: string;
-	type: 'success' | 'info' | 'warning';
+	type: 'success' | 'info' | 'warning' | 'error';
 	read: boolean;
 	createdAt: string;
 }
@@ -14,4 +14,5 @@ export interface NotificationContextState {
 	addNotification: (notification: Omit<AppNotification, 'id' | 'read' | 'createdAt' | 'userId'>) => void;
 	markAsRead: (id: string) => void;
 	markAllAsRead: () => void;
+	clearAll: () => void;
 }

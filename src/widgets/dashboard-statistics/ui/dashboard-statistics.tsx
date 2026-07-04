@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/shared/components/ui';
 import { useSavedJobs } from '@/entities/saved-job';
+import { useApplications } from '@/entities/application';
 
 function BriefcaseIcon({ className }: { className?: string }) {
 	return (
@@ -35,37 +36,59 @@ function BookmarkIcon({ className }: { className?: string }) {
 	);
 }
 
-import { useApplications } from '@/entities/application';
-
 function DashboardStatistics() {
 	const { savedJobs } = useSavedJobs();
 	const { applications } = useApplications();
 
 	const interviewCount = applications.filter(a => a.status === 'Interviewing').length;
+	const appliedCount = applications.filter(a => a.status === 'Applied').length;
+	const reviewingCount = applications.filter(a => a.status === 'Reviewing').length;
+	const totalApps = applications.length;
 
 	const stats = [
 		{ label: 'Saved Jobs', value: savedJobs.length, icon: BookmarkIcon },
-		{ label: 'Applied Jobs', value: applications.length, icon: BriefcaseIcon },
-		// TODO: Profile Views is mocked. Will be derived from backend analytics later.
+		{ label: 'Applied Jobs', value: totalApps, icon: BriefcaseIcon },
 		{ label: 'Profile Views', value: 47, icon: EyeIcon },
 		{ label: 'Interviews', value: interviewCount, icon: CalendarIcon },
 	];
 
 	return (
-		<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-			{stats.map((stat) => (
-				<Card key={stat.label}>
-					<CardContent className="flex flex-col items-start gap-3 p-5">
-						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-hover text-text-secondary">
-							<stat.icon className="h-5 w-5" />
+		<div className="flex flex-col gap-6">
+			<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+				{stats.map((stat) => (
+					<Card key={stat.label}>
+						<CardContent className="flex flex-col items-start gap-3 p-5">
+							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-hover text-text-secondary">
+								<stat.icon className="h-5 w-5" />
+							</div>
+							<div>
+								<p className="text-sm font-medium text-text-secondary">{stat.label}</p>
+								<p className="mt-1 text-2xl font-bold text-text-primary">{stat.value}</p>
+							</div>
+						</CardContent>
+					</Card>
+				))}
+			</div>
+			
+			{/* Application Progress */}
+			{totalApps > 0 && (
+				<Card>
+					<CardContent className="p-5">
+						<h3 className="text-sm font-bold text-text-primary mb-4">Application Progress</h3>
+						<div className="flex items-center gap-1 h-3 rounded-full overflow-hidden bg-surface-hover">
+							<div className="bg-text-tertiary h-full transition-all duration-500" style={{ width: `${(appliedCount / totalApps) * 100}%` }} title="Applied"></div>
+							<div className="bg-primary/50 h-full transition-all duration-500" style={{ width: `${(reviewingCount / totalApps) * 100}%` }} title="Reviewing"></div>
+							<div className="bg-primary h-full transition-all duration-500" style={{ width: `${(interviewCount / totalApps) * 100}%` }} title="Interviewing"></div>
+							<div className="bg-success h-full transition-all duration-500" style={{ width: `${((totalApps - appliedCount - reviewingCount - interviewCount) / totalApps) * 100}%` }} title="Other"></div>
 						</div>
-						<div>
-							<p className="text-sm font-medium text-text-secondary">{stat.label}</p>
-							<p className="mt-1 text-2xl font-bold text-text-primary">{stat.value}</p>
+						<div className="flex justify-between items-center mt-3 text-xs font-medium text-text-secondary px-1">
+							<div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-text-tertiary"></span> Applied ({appliedCount})</div>
+							<div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary/50"></span> Reviewing ({reviewingCount})</div>
+							<div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary"></span> Interviewing ({interviewCount})</div>
 						</div>
 					</CardContent>
 				</Card>
-			))}
+			)}
 		</div>
 	);
 }

@@ -1,40 +1,11 @@
 import { type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Badge, Button, Card } from '@/shared/components/ui';
+import { Badge, Card } from '@/shared/components/ui';
 import { cn } from '@/shared/lib/utils';
 import type { JobListing } from '@/entities/job';
-import { useSavedJobs } from '@/entities/saved-job';
 import { useApplications } from '@/entities/application';
-import { useAuth } from '@/features/auth';
 import { CompanyLogoAvatar } from '@/entities/company';
-import { getJobDetailsPath, ROUTES } from '@/shared/constants/routes';
-import { useLocation } from 'react-router-dom';
-
-function ClockIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-      <circle cx="8" cy="8" r="6.25" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 4.75v3.5l2.25 1.5" />
-    </svg>
-  );
-}
-
-function MapPinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 8.5A1.5 1.5 0 1 0 8 5.5a1.5 1.5 0 0 0 0 3z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 1.75C5.14 1.75 2.833 4.06 2.833 6.917c0 3.65 5.167 7.333 5.167 7.333s5.167-3.683 5.167-7.333C13.167 4.06 10.86 1.75 8 1.75z" />
-    </svg>
-  );
-}
-
-function BookmarkIcon({ className, filled }: { className?: string; filled?: boolean }) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 2.5h8a.5.5 0 0 1 .5.5v10.5L8 10.75 3.5 13.5V3a.5.5 0 0 1 .5-.5z" />
-    </svg>
-  );
-}
+import { getJobDetailsPath } from '@/shared/constants/routes';
 
 function workModeVariant(workMode: JobListing['workMode']) {
   if (workMode === 'Remote') return 'success' as const;
@@ -44,37 +15,29 @@ function workModeVariant(workMode: JobListing['workMode']) {
 
 interface JobCardProps {
   job: JobListing;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }
 
-function JobCard({ job }: JobCardProps) {
+function JobCard({ job, isSelected, onSelect }: JobCardProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const jobDetailState = { state: { fromJobSphere: true } };
-  const { isSaved, toggleSavedJob } = useSavedJobs();
-  const saved = isSaved(job.id);
-  const { applyToJob, isApplied, getApplication } = useApplications();
-  const { isAuthenticated } = useAuth();
   
+  const { isApplied } = useApplications();
   const hasApplied = isApplied(job.id);
-  const application = getApplication(job.id);
-
-  function handleApply(e: React.MouseEvent) {
-    e.stopPropagation();
-    if (!isAuthenticated) {
-      navigate(ROUTES.login, { state: { from: location } });
-      return;
-    }
-    applyToJob(job.id);
-  }
 
   function handleCardClick() {
-    navigate(getJobDetailsPath(job.id), jobDetailState);
+    if (onSelect && window.matchMedia('(min-width: 1024px)').matches) {
+      onSelect();
+    } else {
+      navigate(getJobDetailsPath(job.id), jobDetailState);
+    }
   }
 
   function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      navigate(getJobDetailsPath(job.id), jobDetailState);
+      handleCardClick();
     }
   }
 
@@ -83,91 +46,63 @@ function JobCard({ job }: JobCardProps) {
       interactive
       role="link"
       aria-label={`View details for ${job.title} at ${job.company}`}
-      className="flex h-full flex-col overflow-hidden cursor-pointer"
+      className={cn(
+        "group flex items-start gap-4 p-4 sm:p-5 transition-all duration-200 border-l-[4px]",
+        isSelected 
+          ? "bg-primary/5 border-l-primary shadow-md border-y-primary/20 border-r-primary/20" 
+          : "border-l-transparent border-y-border border-r-border hover:border-border hover:shadow-sm bg-surface"
+      )}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
     >
-      <div className="flex items-start gap-4 p-5 sm:p-6">
-        <CompanyLogoAvatar
-          logo={{ path: job.companyLogo, initial: job.companyInitial, color: job.companyColor }}
-          fallbackInitial={job.companyInitial}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold text-white shadow-sm"
-        />
+      <CompanyLogoAvatar
+        logo={{ path: job.companyLogo, initial: job.companyInitial, color: job.companyColor }}
+        fallbackInitial={job.companyInitial}
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white shadow-sm mt-1"
+      />
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-text-primary">{job.title}</h3>
-            {hasApplied && (
-              <Badge variant="success" className="text-[11px]">
-                Applied - {application?.status}
-              </Badge>
-            )}
-            {job.featured && (
-              <Badge variant="accent" className="text-[11px]">
-                Featured
-              </Badge>
-            )}
+      <div className="min-w-0 flex-1 flex flex-col justify-between">
+        <div className="flex justify-between items-start gap-3">
+          <div className="min-w-0 pr-2">
+            <h3 className={cn(
+              "truncate text-base font-semibold transition-colors duration-150",
+              isSelected ? "text-primary" : "text-text-primary group-hover:text-primary"
+            )}>
+              {job.title}
+            </h3>
+            <p className="truncate text-sm text-text-secondary mt-0.5">{job.company}</p>
           </div>
-
-          <p className="mt-1 text-sm font-medium text-text-secondary">{job.company}</p>
-
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPinIcon className="h-3.5 w-3.5" />
-              {job.location}
-            </span>
-            <span>{job.salaryLabel}</span>
-            <span>{job.experienceLabel}</span>
+          <div className="text-right shrink-0 flex flex-col items-end gap-1 mt-0.5">
+            <span className="text-sm font-medium text-text-primary">{job.salaryLabel}</span>
+            <span className="text-xs text-text-secondary">{job.postedAt}</span>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 text-xs text-text-secondary">
-          <ClockIcon className="h-3.5 w-3.5" />
-          {job.postedAt}
-        </div>
-      </div>
-
-      <div className="px-5 sm:px-6">
-        <div className="flex flex-wrap gap-1.5">
-          <Badge variant={workModeVariant(job.workMode)}>{job.workMode}</Badge>
-          <Badge variant="outline">{job.employmentType}</Badge>
-          {job.skills.slice(0, 3).map((skill) => (
-            <Badge key={skill} variant="outline">
-              {skill}
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {job.featured && <Badge variant="accent" className="text-[10px] py-0 px-1.5 h-5 leading-5 font-semibold">Featured</Badge>}
+          {job.trustBadge && (
+            <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-5 leading-5 border-primary/20 text-primary bg-primary/5 flex items-center gap-1">
+              {job.trustBadge === 'Verified Employer' && <svg className="h-3 w-3 -ml-0.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>}
+              {job.trustBadge}
             </Badge>
+          )}
+          {hasApplied && <Badge variant="success" className="text-[10px] py-0 px-1.5 h-5 leading-5">Applied</Badge>}
+          <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-5 leading-5">{job.location}</Badge>
+          <Badge variant={workModeVariant(job.workMode)} className="text-[10px] py-0 px-1.5 h-5 leading-5">{job.workMode}</Badge>
+          <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-5 leading-5">{job.employmentType}</Badge>
+          <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-5 leading-5">{job.experienceLabel}</Badge>
+        </div>
+        
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {job.skills.slice(0, 3).map(skill => (
+            <span key={skill} className={cn(
+              "inline-flex items-center rounded bg-surface/50 px-1.5 py-0.5 text-[10px] font-medium text-text-secondary ring-1 ring-inset",
+              isSelected ? "ring-primary/20 bg-primary/5" : "ring-border/80"
+            )}>
+              {skill}
+            </span>
           ))}
         </div>
-      </div>
-
-      <p className="px-5 pt-4 text-sm leading-6 text-text-secondary sm:px-6">{job.description}</p>
-
-      <div className="mt-auto flex items-center gap-3 px-5 py-5 sm:px-6">
-        {hasApplied ? (
-          <Button variant="secondary" size="sm" className="flex-1 sm:flex-none" disabled>
-            Applied
-          </Button>
-        ) : (
-          <Button variant="primary" size="sm" className="flex-1 sm:flex-none" onClick={handleApply}>
-            Apply now
-          </Button>
-        )}
-        <button
-          type="button"
-          aria-label={saved ? `Unsave ${job.title} at ${job.company}` : `Save ${job.title} at ${job.company}`}
-          className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg border bg-surface transition-colors duration-150',
-            saved 
-              ? 'border-primary text-primary bg-primary/5 hover:bg-primary/10'
-              : 'border-border text-text-secondary hover:border-primary/30 hover:text-primary',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleSavedJob(job.id);
-          }}
-        >
-          <BookmarkIcon className="h-4 w-4" filled={saved} />
-        </button>
       </div>
     </Card>
   );

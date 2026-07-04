@@ -1,10 +1,7 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { Container } from './container';
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
+import { Button, Logo } from '@/shared/components/ui';
 
 interface FooterLink {
   label: string;
@@ -15,10 +12,6 @@ interface FooterLinkGroup {
   title: string;
   links: FooterLink[];
 }
-
-/* ------------------------------------------------------------------ */
-/*  Social Icon                                                        */
-/* ------------------------------------------------------------------ */
 
 interface SocialIconProps {
   label: string;
@@ -34,48 +27,41 @@ function SocialIcon({ label, href, pathData }: SocialIconProps) {
       rel="noopener noreferrer"
       aria-label={label}
       className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-md',
-        'text-text-secondary transition-colors duration-150',
-        'hover:text-text-primary hover:bg-background',
+        'flex h-10 w-10 items-center justify-center rounded-full bg-surface-hover',
+        'text-text-secondary transition-all duration-200',
+        'hover:text-primary hover:bg-primary/10 hover:-translate-y-1',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
       )}
     >
-      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path d={pathData} />
       </svg>
     </a>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Data                                                               */
-/* ------------------------------------------------------------------ */
-
 const FOOTER_LINKS: FooterLinkGroup[] = [
   {
-    title: 'For Job Seekers',
+    title: 'Product',
     links: [
-      { label: 'Browse Jobs', href: '/jobs' },
+      { label: 'Jobs', href: '/jobs' },
       { label: 'Companies', href: '/companies' },
-      { label: 'Career Advice', href: '/advice' },
-      { label: 'Salary Insights', href: '/salary' },
+      { label: 'Pricing', href: '/pricing' },
     ],
   },
   {
-    title: 'For Employers',
+    title: 'Resources',
     links: [
-      { label: 'Post a Job', href: '/post' },
-      { label: 'Pricing', href: '/pricing' },
-      { label: 'Hire Developers', href: '/hire' },
+      { label: 'Career Advice', href: '/advice' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Help Center', href: '/help' },
     ],
   },
   {
     title: 'Company',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Blog', href: '/blog' },
       { label: 'Contact', href: '/contact' },
-      { label: 'Privacy Policy', href: '/privacy' },
     ],
   },
 ];
@@ -98,111 +84,91 @@ const SOCIAL_LINKS: SocialIconProps[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Footer Component                                                   */
-/* ------------------------------------------------------------------ */
-
-/**
- * Footer — clean, minimal application footer.
- * White background, simple top border, consistent link columns.
- */
 function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-surface border-t border-border">
-      <Container padding="md" className="py-12 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
-
-          {/* ---- Brand Column ---- */}
+    <footer className="bg-surface border-t border-border/60">
+      <Container padding="md" className="py-16 lg:py-24">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-6 lg:gap-8">
+          
+          {/* Brand & Newsletter */}
           <div className="lg:col-span-2">
-            <Link
-              to="/"
-              className={cn(
-                'inline-flex items-center gap-2 rounded-md',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-              )}
-              aria-label="JobSphere — Home"
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-                <span className="text-[10px] font-bold text-white" style={{ fontFamily: 'monospace' }}>
-                  {'</>'}
-                </span>
-              </div>
-              <span className="text-sm font-semibold text-text-primary">JobSphere</span>
-            </Link>
+            <Logo />
 
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary">
-              The modern platform for software engineers to discover verified
-              opportunities at the best companies.
+            <p className="mt-4 max-w-sm text-base leading-relaxed text-text-secondary">
+              The modern platform for software engineers to discover verified opportunities at the best companies.
             </p>
-
-            <div className="mt-5 flex items-center gap-0.5" aria-label="Social media links">
-              {SOCIAL_LINKS.map((social) => (
-                <SocialIcon key={social.label} {...social} />
-              ))}
+            
+            <div className="mt-2 text-xs font-medium text-text-tertiary">
+              v1.0.0 (Production)
+            </div>
+            
+            <div className="mt-8">
+              <h4 className="text-sm font-semibold text-text-primary mb-3">Subscribe to our newsletter</h4>
+              <form className="flex gap-2 max-w-sm" onSubmit={(e) => e.preventDefault()}>
+                <input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  required
+                  className="flex-1 h-10 px-3 rounded-lg border border-border/80 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                />
+                <Button type="submit" variant="primary" className="h-10 px-4 rounded-lg shadow-sm">
+                  Subscribe
+                </Button>
+              </form>
             </div>
           </div>
 
-          {/* ---- Quick Link Columns ---- */}
-          {FOOTER_LINKS.map((group) => (
-            <div key={group.title}>
-              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-primary">
-                {group.title}
-              </h3>
-              <ul className="flex flex-col gap-2" role="list">
-                {group.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      to={link.href}
-                      className={cn(
-                        'text-sm text-text-secondary',
-                        'transition-colors duration-150 hover:text-text-primary',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-                        'rounded-sm',
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </Container>
+          {/* Spacer */}
+          <div className="hidden lg:block lg:col-span-1"></div>
 
-      {/* ---- Bottom Bar ---- */}
-      <div className="border-t border-border">
-        <Container
-          padding="md"
-          className="flex flex-col items-center justify-between gap-3 py-4 sm:flex-row"
-        >
-          <p className="text-xs text-text-secondary">
+          {/* Links */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3">
+            {FOOTER_LINKS.map((group) => (
+              <div key={group.title}>
+                <h3 className="mb-4 text-sm font-bold text-text-primary">
+                  {group.title}
+                </h3>
+                <ul className="flex flex-col gap-3" role="list">
+                  {group.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        to={link.href}
+                        className={cn(
+                          'text-sm font-medium text-text-secondary',
+                          'transition-all duration-200 hover:text-primary hover:translate-x-1 inline-block',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm',
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+        </div>
+        
+        <div className="mt-16 pt-8 border-t border-border/50 flex flex-col items-center justify-between gap-6 sm:flex-row">
+          <p className="text-sm font-medium text-text-secondary">
             &copy; {currentYear} JobSphere, Inc. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/terms"
-              className="text-xs text-text-secondary transition-colors duration-150 hover:text-text-primary rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-            >
-              Terms
-            </Link>
-            <Link
-              to="/privacy"
-              className="text-xs text-text-secondary transition-colors duration-150 hover:text-text-primary rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-            >
-              Privacy
-            </Link>
-            <Link
-              to="/cookies"
-              className="text-xs text-text-secondary transition-colors duration-150 hover:text-text-primary rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-            >
-              Cookies
-            </Link>
+          
+          <div className="flex items-center gap-6">
+            <Link to="/terms" className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">Terms</Link>
+            <Link to="/privacy" className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">Privacy</Link>
           </div>
-        </Container>
-      </div>
+
+          <div className="flex items-center gap-2">
+            {SOCIAL_LINKS.map((social) => (
+              <SocialIcon key={social.label} {...social} />
+            ))}
+          </div>
+        </div>
+      </Container>
     </footer>
   );
 }
