@@ -1,13 +1,18 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui';
-import { JOBS } from '@/entities/job';
+import { useSavedJobs, resolveSavedJob } from '@/entities/saved-job';
 import { CompanyLogoAvatar } from '@/entities/company';
 import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES, getJobDetailsPath } from '@/shared/constants/routes';
 
 function DashboardSavedJobs() {
 	const navigate = useNavigate();
-	// Mock: Get the first 5 jobs
-	const savedJobs = JOBS.slice(0, 5);
+	const { savedJobs } = useSavedJobs();
+	
+	// Resolve the first 5 saved jobs
+	const recentSavedJobs = savedJobs
+		.slice(0, 5)
+		.map(resolveSavedJob)
+		.map(sj => sj.job);
 
 	return (
 		<Card>
@@ -21,7 +26,7 @@ function DashboardSavedJobs() {
 				</Link>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
-				{savedJobs.map((job) => (
+				{recentSavedJobs.map((job) => (
 					<div
 						key={job.id}
 						role="button"
@@ -54,7 +59,7 @@ function DashboardSavedJobs() {
 						</div>
 					</div>
 				))}
-				{savedJobs.length === 0 && (
+				{recentSavedJobs.length === 0 && (
 					<div className="py-4 text-center text-sm text-text-secondary">
 						No saved jobs yet.
 					</div>

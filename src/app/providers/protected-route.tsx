@@ -7,8 +7,12 @@ import { Navigate, useLocation } from 'react-router-dom';
  * It preserves the intended destination to redirect back after login.
  */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, isLoading } = useAuth();
 	const location = useLocation();
+
+	if (isLoading) {
+		return null; // Or a loading spinner
+	}
 
 	if (!isAuthenticated) {
 		return <Navigate to={ROUTES.login} state={{ from: location }} replace />;

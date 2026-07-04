@@ -3,8 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Badge, Button, Card } from '@/shared/components/ui';
 import { cn } from '@/shared/lib/utils';
 import type { JobListing } from '@/entities/job';
+import { useSavedJobs } from '@/entities/saved-job';
+import { useApplications } from '@/entities/application';
+import { useAuth } from '@/features/auth';
 import { CompanyLogoAvatar } from '@/entities/company';
-import { getJobDetailsPath } from '@/shared/constants/routes';
+import { getJobDetailsPath, ROUTES } from '@/shared/constants/routes';
+import { useLocation } from 'react-router-dom';
 
 function ClockIcon({ className }: { className?: string }) {
   return (
@@ -24,9 +28,9 @@ function MapPinIcon({ className }: { className?: string }) {
   );
 }
 
-function BookmarkIcon({ className }: { className?: string }) {
+function BookmarkIcon({ className, filled }: { className?: string; filled?: boolean }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+    <svg className={className} viewBox="0 0 16 16" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 2.5h8a.5.5 0 0 1 .5.5v10.5L8 10.75 3.5 13.5V3a.5.5 0 0 1 .5-.5z" />
     </svg>
   );
@@ -44,7 +48,24 @@ interface JobCardProps {
 
 function JobCard({ job }: JobCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const jobDetailState = { state: { fromJobSphere: true } };
+  const { isSaved, toggleSavedJob } = useSavedJobs();
+  const saved = isSaved(job.id);
+  const { applyToJob, isApplied, getApplication } = useApplications();
+  const { isAuthenticated } = useAuth();
+  
+  const hasApplied = isApplied(job.id);
+  const application = getApplication(job.id);
+
+  function handleApply(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, { state: { from: location } });
+      return;
+    }
+    applyToJob(job.id);
+  }
 
   function handleCardClick() {
     navigate(getJobDetailsPath(job.id), jobDetailState);
@@ -76,6 +97,11 @@ function JobCard({ job }: JobCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold text-text-primary">{job.title}</h3>
+            {hasApplied && (
+              <Badge variant="success" className="text-[11px]">
+                Applied - {application?.status}
+              </Badge>
+            )}
             {job.featured && (
               <Badge variant="accent" className="text-[11px]">
                 Featured
@@ -116,19 +142,31 @@ function JobCard({ job }: JobCardProps) {
       <p className="px-5 pt-4 text-sm leading-6 text-text-secondary sm:px-6">{job.description}</p>
 
       <div className="mt-auto flex items-center gap-3 px-5 py-5 sm:px-6">
-        <Button variant="primary" size="sm" className="flex-1 sm:flex-none">
-          Apply now
-        </Button>
+        {hasApplied ? (
+          <Button variant="secondary" size="sm" className="flex-1 sm:flex-none" disabled>
+            Applied
+          </Button>
+        ) : (
+          <Button variant="primary" size="sm" className="flex-1 sm:flex-none" onClick={handleApply}>
+            Apply now
+          </Button>
+        )}
         <button
           type="button"
-          aria-label={`Save ${job.title} at ${job.company}`}
+          aria-label={saved ? `Unsave ${job.title} at ${job.company}` : `Save ${job.title} at ${job.company}`}
           className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-text-secondary',
-            'transition-colors duration-150 hover:border-primary/30 hover:text-primary',
+            'flex h-9 w-9 items-center justify-center rounded-lg border bg-surface transition-colors duration-150',
+            saved 
+              ? 'border-primary text-primary bg-primary/5 hover:bg-primary/10'
+              : 'border-border text-text-secondary hover:border-primary/30 hover:text-primary',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           )}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleSavedJob(job.id);
+          }}
         >
-          <BookmarkIcon className="h-4 w-4" />
+          <BookmarkIcon className="h-4 w-4" filled={saved} />
         </button>
       </div>
     </Card>

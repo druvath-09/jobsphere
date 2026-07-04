@@ -27,7 +27,7 @@ function NavbarAuth() {
 					to={ROUTES.dashboard}
 					className="text-sm font-medium text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm transition-colors"
 				>
-					Welcome, {currentUser?.fullName.split(' ')[0]}
+					Welcome, {currentUser?.fullName}
 				</Link>
 				<div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
 				<Button

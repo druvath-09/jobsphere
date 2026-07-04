@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/shared/components/ui';
-import { getRecentApplications } from '@/entities/application';
+import { useApplications } from '@/entities/application';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/shared/constants/routes';
 
@@ -12,6 +12,7 @@ function statusBadgeVariant(status: string) {
 		case 'Interviewing':
 			return 'primary';
 		case 'Offered':
+		case 'Accepted':
 			return 'success';
 		case 'Rejected':
 			return 'error';
@@ -21,7 +22,7 @@ function statusBadgeVariant(status: string) {
 }
 
 function DashboardRecentApplications() {
-	const applications = getRecentApplications();
+	const { recentApplications: applications } = useApplications();
 
 	return (
 		<Card>

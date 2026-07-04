@@ -21,6 +21,7 @@ function RegisterPage() {
 	const {
 		register,
 		handleSubmit,
+		setError,
 		formState: { errors },
 	} = useForm<RegisterFormData>({
 		resolver: zodResolver(registerSchema),
@@ -34,8 +35,12 @@ function RegisterPage() {
 	});
 
 	const onSubmit = async (data: RegisterFormData) => {
-		await registerUser(data.fullName, data.email, data.password);
-		navigate(ROUTES.dashboard);
+		try {
+			await registerUser(data.fullName, data.email, data.password);
+			navigate(ROUTES.dashboard);
+		} catch (error: any) {
+			setError('root', { message: error.message || 'Registration failed' });
+		}
 	};
 
 	return (
@@ -51,6 +56,11 @@ function RegisterPage() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+						{errors.root && (
+							<div className="rounded-md bg-error/10 p-3">
+								<p className="text-sm font-medium text-error">{errors.root.message}</p>
+							</div>
+						)}
 						<div className="grid gap-1.5">
 							<label htmlFor="reg-fullName" className="text-sm font-medium text-text-primary">
 								Full Name

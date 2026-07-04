@@ -18,7 +18,7 @@ export interface AuthContextType {
 	/** True while an async authentication operation is in progress. */
 	isLoading: boolean;
 	/** Logs the user in. */
-	login: (email: string, password?: string) => Promise<void>;
+	login: (email: string, password?: string, rememberMe?: boolean) => Promise<void>;
 	/** Logs the user out. */
 	logout: () => Promise<void>;
 	/** Registers a new user. */

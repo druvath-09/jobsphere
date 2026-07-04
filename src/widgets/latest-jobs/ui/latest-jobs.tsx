@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { JOBS, type JobListing } from '@/entities/job';
+import { useSavedJobs } from '@/entities/saved-job';
 import { CompanyLogoAvatar } from '@/entities/company';
 import { Container } from '@/shared/components/layout';
 import { Button, Badge, Card } from '@/shared/components/ui';
@@ -18,9 +19,9 @@ function MapPinIcon({ className }: { className?: string }) {
   );
 }
 
-function BookmarkIcon({ className }: { className?: string }) {
+function BookmarkIcon({ className, filled }: { className?: string; filled?: boolean }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+    <svg className={className} viewBox="0 0 16 16" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.333 14L8 10.667 12.667 14V2.667A1.333 1.333 0 0 0 11.333 1.333H4.667A1.333 1.333 0 0 0 3.333 2.667V14z" />
     </svg>
   );
@@ -65,6 +66,8 @@ function workModeBadgeVariant(mode: JobListing['workMode']) {
 function JobCard({ job }: { job: JobListing }) {
   const navigate = useNavigate();
   const jobDetailState = { state: { fromJobSphere: true } };
+  const { isSaved, toggleSavedJob } = useSavedJobs();
+  const saved = isSaved(job.id);
 
   return (
     <Card
@@ -131,22 +134,29 @@ function JobCard({ job }: { job: JobListing }) {
           variant="primary"
           size="sm"
           className="flex-1 justify-center sm:flex-none"
-          onClick={() => navigate(getJobDetailsPath(job.id), jobDetailState)}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(getJobDetailsPath(job.id), jobDetailState);
+          }}
         >
           Apply Now
         </Button>
         <button
           type="button"
-          aria-label={`Save ${job.title} at ${job.company}`}
+          aria-label={saved ? `Unsave ${job.title} at ${job.company}` : `Save ${job.title} at ${job.company}`}
           className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-md',
-            'text-text-secondary border border-border bg-surface',
-            'transition-colors duration-150',
-            'hover:border-primary/40 hover:text-primary',
+            'flex h-8 w-8 items-center justify-center rounded-md border transition-colors duration-150',
+            saved 
+              ? 'border-primary text-primary bg-primary/5 hover:bg-primary/10'
+              : 'border-border bg-surface text-text-secondary hover:border-primary/40 hover:text-primary',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           )}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleSavedJob(job.id);
+          }}
         >
-          <BookmarkIcon className="h-3.5 w-3.5" />
+          <BookmarkIcon className="h-3.5 w-3.5" filled={saved} />
         </button>
       </div>
     </Card>

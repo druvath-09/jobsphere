@@ -4,9 +4,12 @@ import {
 	useState,
 	useMemo,
 	useCallback,
+	useEffect,
 	type ReactNode,
 } from 'react';
 import { type AuthContextType, type User } from '../types/auth-types';
+import { AUTH_USER_KEY, AUTH_REMEMBER_KEY } from '../constants/auth-constants';
+import { findUserByEmail, createUser } from '../store/mock-user-store';
 
 /* ------------------------------------------------------------------ */
 /*  Context                                                          */
@@ -28,37 +31,97 @@ interface AuthProviderProps {
  */
 function AuthProvider({ children }: AuthProviderProps) {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Hydrate session on startup
+	useEffect(() => {
+		try {
+			const storedSessionUser = sessionStorage.getItem(AUTH_USER_KEY);
+			const storedLocalUser = localStorage.getItem(AUTH_USER_KEY);
+			
+			if (storedSessionUser) {
+				setCurrentUser(JSON.parse(storedSessionUser));
+			} else if (storedLocalUser) {
+				setCurrentUser(JSON.parse(storedLocalUser));
+			}
+		} catch (error) {
+			console.error('Failed to parse stored user session', error);
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
 
 	const isAuthenticated = useMemo(() => !!currentUser, [currentUser]);
 
-	const login = useCallback(async (email: string) => {
+	const login = useCallback(async (email: string, password?: string, rememberMe?: boolean) => {
 		setIsLoading(true);
-		console.log(`Attempting login for: ${email}`);
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		const user: User = { id: '1', fullName: 'John Doe', email };
+		
+		// Simulate network request
+		await new Promise((resolve) => setTimeout(resolve, 800));
+		
+		const userRecord = findUserByEmail(email);
+		
+		if (!userRecord || userRecord.password !== password) {
+			setIsLoading(false);
+			throw new Error('Invalid email or password.');
+		}
+
+		const user: User = { 
+			id: userRecord.id, 
+			fullName: userRecord.fullName, 
+			email: userRecord.email 
+		};
+		
 		setCurrentUser(user);
+
+		if (rememberMe) {
+			localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+			localStorage.setItem(AUTH_REMEMBER_KEY, 'true');
+		} else {
+			sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+			localStorage.removeItem(AUTH_USER_KEY);
+			localStorage.removeItem(AUTH_REMEMBER_KEY);
+		}
+
 		setIsLoading(false);
-		console.log('Login successful');
 	}, []);
 
-	const register = useCallback(async (fullName: string, email: string) => {
+	const register = useCallback(async (fullName: string, email: string, password?: string) => {
 		setIsLoading(true);
-		console.log(`Attempting registration for: ${fullName} <${email}>`);
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		const user: User = { id: '1', fullName, email };
-		setCurrentUser(user);
-		setIsLoading(false);
-		console.log('Registration successful');
+		
+		// Simulate network request
+		await new Promise((resolve) => setTimeout(resolve, 800));
+
+		try {
+			// This will throw if the email is already in use
+			const userRecord = createUser(fullName, email, password);
+			
+			const user: User = { 
+				id: userRecord.id, 
+				fullName: userRecord.fullName, 
+				email: userRecord.email 
+			};
+			
+			setCurrentUser(user);
+			sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+			
+			setIsLoading(false);
+		} catch (error) {
+			setIsLoading(false);
+			throw error;
+		}
 	}, []);
 
 	const logout = useCallback(async () => {
 		setIsLoading(true);
-		console.log('Attempting logout');
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await new Promise((resolve) => setTimeout(resolve, 300));
+		
 		setCurrentUser(null);
+		localStorage.removeItem(AUTH_USER_KEY);
+		localStorage.removeItem(AUTH_REMEMBER_KEY);
+		sessionStorage.removeItem(AUTH_USER_KEY);
+		
 		setIsLoading(false);
-		console.log('Logout successful');
 	}, []);
 
 	const value = useMemo(

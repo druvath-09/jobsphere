@@ -2,9 +2,13 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@/share
 import { Container } from '@/shared/components/layout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { JobDetails } from '@/entities/job';
+import { useSavedJobs } from '@/entities/saved-job';
 import { CompanyLogoAvatar } from '@/entities/company';
-import { getJobsPath } from '@/shared/constants/routes';
+import { useApplications } from '@/entities/application';
+import { useAuth } from '@/features/auth';
+import { getJobsPath, ROUTES } from '@/shared/constants/routes';
 import { SimilarJobs } from './similar-jobs';
+import { cn } from '@/shared/lib/utils';
 
 function ArrowLeftIcon({ className }: { className?: string }) {
   return (
@@ -24,9 +28,9 @@ function ShareIcon({ className }: { className?: string }) {
   );
 }
 
-function BookmarkIcon({ className }: { className?: string }) {
+function BookmarkIcon({ className, filled }: { className?: string; filled?: boolean }) {
   return (
-    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+    <svg className={className} viewBox="0 0 16 16" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 2.5h8a.5.5 0 0 1 .5.5v10.5L8 10.75 3.5 13.5V3a.5.5 0 0 1 .5-.5z" />
     </svg>
   );
@@ -59,6 +63,23 @@ function JobDetailsContent({ job }: JobDetailsContentProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const fromJobSphere = (location.state as { fromJobSphere?: boolean } | null)?.fromJobSphere;
+  
+  const { isSaved, toggleSavedJob } = useSavedJobs();
+  const saved = isSaved(job.id);
+
+  const { applyToJob, isApplied, getApplication } = useApplications();
+  const { isAuthenticated } = useAuth();
+  
+  const hasApplied = isApplied(job.id);
+  const application = getApplication(job.id);
+
+  function handleApply() {
+    if (!isAuthenticated) {
+      navigate(ROUTES.login, { state: { from: location } });
+      return;
+    }
+    applyToJob(job.id);
+  }
 
   function handleBackToJobs() {
     if (fromJobSphere) {
@@ -102,6 +123,9 @@ function JobDetailsContent({ job }: JobDetailsContentProps) {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
+                    {hasApplied && (
+                      <Badge variant="success">Applied - {application?.status}</Badge>
+                    )}
                     {job.featured && (
                       <Badge variant="accent">Featured</Badge>
                     )}
@@ -115,11 +139,23 @@ function JobDetailsContent({ job }: JobDetailsContentProps) {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                <Button variant="primary" size="md" className="w-full sm:w-auto">
-                  Apply Now
-                </Button>
-                <Button variant="outline" size="md" className="w-full sm:w-auto" leftIcon={<BookmarkIcon className="h-4 w-4" />}>
-                  Save Job
+                {hasApplied ? (
+                  <Button variant="secondary" size="md" className="w-full sm:w-auto" disabled>
+                    Applied
+                  </Button>
+                ) : (
+                  <Button variant="primary" size="md" className="w-full sm:w-auto" onClick={handleApply}>
+                    Apply Now
+                  </Button>
+                )}
+                <Button 
+                  variant={saved ? "secondary" : "outline"}
+                  size="md" 
+                  className={cn("w-full sm:w-auto", saved && "bg-primary/5 text-primary hover:bg-primary/10")} 
+                  leftIcon={<BookmarkIcon className="h-4 w-4" filled={saved} />}
+                  onClick={() => toggleSavedJob(job.id)}
+                >
+                  {saved ? 'Saved' : 'Save Job'}
                 </Button>
               </div>
             </div>
@@ -215,11 +251,23 @@ function JobDetailsContent({ job }: JobDetailsContentProps) {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="primary" size="md" className="w-full">
-                  Apply Now
-                </Button>
-                <Button variant="outline" size="md" className="w-full" leftIcon={<BookmarkIcon className="h-4 w-4" />}>
-                  Save Job
+                {hasApplied ? (
+                  <Button variant="secondary" size="md" className="w-full" disabled>
+                    Applied
+                  </Button>
+                ) : (
+                  <Button variant="primary" size="md" className="w-full" onClick={handleApply}>
+                    Apply Now
+                  </Button>
+                )}
+                <Button 
+                  variant={saved ? "secondary" : "outline"}
+                  size="md" 
+                  className={cn("w-full", saved && "bg-primary/5 text-primary hover:bg-primary/10")} 
+                  leftIcon={<BookmarkIcon className="h-4 w-4" filled={saved} />}
+                  onClick={() => toggleSavedJob(job.id)}
+                >
+                  {saved ? 'Saved' : 'Save Job'}
                 </Button>
                 <Button variant="ghost" size="md" className="w-full" leftIcon={<ShareIcon className="h-4 w-4" />}>
                   Share Job

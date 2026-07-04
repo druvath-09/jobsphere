@@ -16,12 +16,17 @@ import {
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+import { findUserByEmail } from '@/features/auth/model/store/mock-user-store';
+import { AUTH_RESET_EMAIL_KEY } from '@/features/auth/model/constants/auth-constants';
+
 function ForgotPasswordPage() {
-	const [isSuccess, setIsSuccess] = useState(false);
+	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(false);
 	const {
 		register,
 		handleSubmit,
+		setError,
 		formState: { errors },
 	} = useForm<ForgotPasswordFormData>({
 		resolver: zodResolver(forgotPasswordSchema),
@@ -32,33 +37,23 @@ function ForgotPasswordPage() {
 
 	const onSubmit = async (data: ForgotPasswordFormData) => {
 		setIsLoading(true);
-		console.log('Password reset requested for:', data.email);
-		await new Promise((resolve) => setTimeout(resolve, 1500));
+		
+		await new Promise((resolve) => setTimeout(resolve, 800));
+		
+		const user = findUserByEmail(data.email);
+		
 		setIsLoading(false);
-		setIsSuccess(true);
+		
+		if (!user) {
+			setError('root', { message: 'We could not find an account with that email.' });
+			return;
+		}
+
+		sessionStorage.setItem(AUTH_RESET_EMAIL_KEY, data.email);
+		navigate(ROUTES.resetPassword);
 	};
 
-	if (isSuccess) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-background p-4">
-				<Card className="w-full max-w-md">
-					<CardHeader className="text-center">
-						<CardTitle className="text-2xl font-bold tracking-tight">
-							Check Your Email
-						</CardTitle>
-						<CardDescription>
-							We&apos;ve sent a password reset link to your email address.
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Link to={ROUTES.login} className="block">
-							<Button className="w-full">Back to Login</Button>
-						</Link>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
+
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -73,6 +68,11 @@ function ForgotPasswordPage() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+						{errors.root && (
+							<div className="rounded-md bg-error/10 p-3">
+								<p className="text-sm font-medium text-error">{errors.root.message}</p>
+							</div>
+						)}
 						<div className="grid gap-1.5">
 							<label htmlFor="forgot-email" className="text-sm font-medium text-text-primary">
 								Email

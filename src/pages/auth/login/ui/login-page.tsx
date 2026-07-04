@@ -22,6 +22,7 @@ function LoginPage() {
 	const {
 		register,
 		handleSubmit,
+		setError,
 		formState: { errors },
 	} = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
@@ -33,10 +34,14 @@ function LoginPage() {
 	});
 
 	const onSubmit = async (data: LoginFormData) => {
-		await login(data.email, data.password);
-		// Redirect to the page they were trying to visit, or dashboard
-		const from = (location.state as { from?: Location })?.from?.pathname || ROUTES.dashboard;
-		navigate(from, { replace: true });
+		try {
+			await login(data.email, data.password, data.rememberMe);
+			// Redirect to the page they were trying to visit, or dashboard
+			const from = (location.state as { from?: Location })?.from?.pathname || ROUTES.dashboard;
+			navigate(from, { replace: true });
+		} catch (error: any) {
+			setError('root', { message: error.message || 'Failed to login' });
+		}
 	};
 
 	return (
@@ -52,6 +57,11 @@ function LoginPage() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+						{errors.root && (
+							<div className="rounded-md bg-error/10 p-3">
+								<p className="text-sm font-medium text-error">{errors.root.message}</p>
+							</div>
+						)}
 						<div className="grid gap-1.5">
 							<label htmlFor="login-email" className="text-sm font-medium text-text-primary">
 								Email

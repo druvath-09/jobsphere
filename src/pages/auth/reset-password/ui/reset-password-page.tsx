@@ -14,7 +14,9 @@ import {
 	Input,
 } from '@/shared/components/ui';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { updateUserPassword } from '@/features/auth/model/store/mock-user-store';
+import { AUTH_RESET_EMAIL_KEY } from '@/features/auth/model/constants/auth-constants';
 
 function ResetPasswordPage() {
 	const navigate = useNavigate();
@@ -22,6 +24,7 @@ function ResetPasswordPage() {
 	const {
 		register,
 		handleSubmit,
+		setError,
 		formState: { errors },
 	} = useForm<ResetPasswordFormData>({
 		resolver: zodResolver(resetPasswordSchema),
@@ -31,12 +34,34 @@ function ResetPasswordPage() {
 		},
 	});
 
+	useEffect(() => {
+		const email = sessionStorage.getItem(AUTH_RESET_EMAIL_KEY);
+		if (!email) {
+			navigate(ROUTES.forgotPassword, { replace: true });
+		}
+	}, [navigate]);
+
 	const onSubmit = async (data: ResetPasswordFormData) => {
 		setIsLoading(true);
-		console.log('Password reset for:', data);
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		setIsLoading(false);
-		navigate(ROUTES.login);
+		
+		const email = sessionStorage.getItem(AUTH_RESET_EMAIL_KEY);
+		if (!email) {
+			setIsLoading(false);
+			navigate(ROUTES.forgotPassword, { replace: true });
+			return;
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, 800));
+
+		try {
+			updateUserPassword(email, data.newPassword);
+			sessionStorage.removeItem(AUTH_RESET_EMAIL_KEY);
+			setIsLoading(false);
+			navigate(ROUTES.login, { state: { message: 'Password reset successfully. Please log in.' } });
+		} catch (error: any) {
+			setIsLoading(false);
+			setError('root', { message: error.message || 'Failed to reset password.' });
+		}
 	};
 
 	return (
@@ -52,6 +77,11 @@ function ResetPasswordPage() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+						{errors.root && (
+							<div className="rounded-md bg-error/10 p-3">
+								<p className="text-sm font-medium text-error">{errors.root.message}</p>
+							</div>
+						)}
 						<div className="grid gap-1.5">
 							<label htmlFor="reset-newPassword" className="text-sm font-medium text-text-primary">
 								New Password
