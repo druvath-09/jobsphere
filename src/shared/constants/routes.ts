@@ -6,6 +6,10 @@ export const ROUTES = {
 	register: '/register',
 	forgotPassword: '/forgot-password',
 	resetPassword: '/reset-password',
+	dashboard: '/dashboard',
+	profile: '/profile',
+	savedJobs: '/saved-jobs',
+	applications: '/applications',
 } as const;
 
 export function getJobsPath(query = '') {

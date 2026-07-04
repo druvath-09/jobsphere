@@ -35,7 +35,7 @@ function RegisterPage() {
 
 	const onSubmit = async (data: RegisterFormData) => {
 		await registerUser(data.fullName, data.email, data.password);
-		navigate(ROUTES.home);
+		navigate(ROUTES.dashboard);
 	};
 
 	return (

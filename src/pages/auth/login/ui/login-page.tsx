@@ -34,8 +34,8 @@ function LoginPage() {
 
 	const onSubmit = async (data: LoginFormData) => {
 		await login(data.email, data.password);
-		// Redirect to the page they were trying to visit, or home
-		const from = (location.state as { from?: Location })?.from?.pathname || ROUTES.home;
+		// Redirect to the page they were trying to visit, or dashboard
+		const from = (location.state as { from?: Location })?.from?.pathname || ROUTES.dashboard;
 		navigate(from, { replace: true });
 	};
 
