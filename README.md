@@ -97,20 +97,6 @@ JobSphere utilizes a fully automated continuous integration and delivery system:
 * **GitHub Actions**: Every pull request and push to the `main` branch triggers the Actions CI pipeline, automatically installing dependencies and verifying production builds.
 * **Vercel Deployment**: Successful builds are automatically detected by Vercel's Git Integration, trigger-deploying changes straight to production.
 
----
-
-## Screenshots
-
-### Home Page
-*(Placeholder for Home Page screenshot)*
-
-### Jobs
-*(Placeholder for Jobs directory screenshot)*
-
-### Companies
-*(Placeholder for Companies directory screenshot)*
-
----
 
 ## Documentation
 
