@@ -1,0 +1,48 @@
+# GitHub Actions Continuous Integration (CI) Workflow
+# This workflow runs automatically on pushes and pull requests to the main branch.
+# It installs dependencies, verifies the build, and runs tests if configured.
+
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Test Application
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Install Node.js and cache npm dependencies automatically
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      # Step 3: Install dependencies cleanly using lockfile
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Build the application to verify compilation and bundler settings
+      - name: Run Build
+        run: npm run build
+
+      # Step 5: Conditionally run tests if the "test" script is defined in package.json
+      - name: Run Tests (Conditional)
+        run: |
+          if node -e "const pkg = require('./package.json'); if (!pkg.scripts || !pkg.scripts.test) { console.log('No test script found in package.json, skipping.'); process.exit(1); }" 2>/dev/null; then
+            echo "Test script found. Running tests..."
+            npm test
+          else
+            echo "Skipping test suite as no test script exists."
+          fi
