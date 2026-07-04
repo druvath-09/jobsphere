@@ -1,29 +1,21 @@
-import { MainLayout } from '@/shared/components/layout';
-import { HeroSection } from '@/widgets/hero';
+import { NavbarAuth } from '@/widgets/navbar-auth';
 import { FeaturedCompanies } from '@/widgets/featured-companies';
-import { PopularCategories } from '@/widgets/popular-categories';
+import { HeroSection } from '@/widgets/hero';
 import { LatestJobs } from '@/widgets/latest-jobs';
+import { PopularCategories } from '@/widgets/popular-categories';
 import { WhyJobSphere } from '@/widgets/why-jobsphere';
+import { MainLayout } from '@/shared/components/layout';
 
-/**
- * HomePage — the public landing page.
- *
- * Composes the full page structure:
- *   Navbar → Hero → Companies → Categories → Jobs → Why → Footer
- *
- * All sections are self-contained widgets from the widgets/ FSD layer.
- * No routing, authentication, or Firebase.
- */
 function HomePage() {
-  return (
-    <MainLayout>
-      <HeroSection />
-      <FeaturedCompanies />
-      <PopularCategories />
-      <LatestJobs />
-      <WhyJobSphere />
-    </MainLayout>
-  );
+	return (
+		<MainLayout navbarProps={{ authSlot: <NavbarAuth /> }}>
+			<HeroSection />
+			<FeaturedCompanies />
+			<LatestJobs />
+			<PopularCategories />
+			<WhyJobSphere />
+		</MainLayout>
+	);
 }
 
 export { HomePage };

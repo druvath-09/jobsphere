@@ -1,24 +1,20 @@
-import { useEffect } from 'react';
+import { NavbarAuth } from '@/widgets/navbar-auth';
+import { JobDetailsContent, JobNotFound } from '@/widgets/job-details';
 import { MainLayout } from '@/shared/components/layout';
 import { getJobDetails } from '@/entities/job';
-import { JobDetailsContent, JobNotFound } from '@/widgets/job-details';
 
 interface JobDetailsPageProps {
-  jobId: string;
+	jobId: string;
 }
 
 function JobDetailsPage({ jobId }: JobDetailsPageProps) {
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [jobId]);
+	const job = getJobDetails(jobId);
 
-  const job = getJobDetails(jobId);
-
-  return (
-    <MainLayout>
-      {job ? <JobDetailsContent job={job} /> : <JobNotFound />}
-    </MainLayout>
-  );
+	return (
+		<MainLayout navbarProps={{ authSlot: <NavbarAuth /> }}>
+			{job ? <JobDetailsContent job={job} /> : <JobNotFound />}
+		</MainLayout>
+	);
 }
 
 export { JobDetailsPage };

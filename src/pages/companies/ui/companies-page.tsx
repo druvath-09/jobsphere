@@ -1,3 +1,4 @@
+import { NavbarAuth } from '@/widgets/navbar-auth';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Badge, Button, Card, CardContent } from '@/shared/components/ui';
 import { Container, MainLayout } from '@/shared/components/layout';
@@ -179,7 +180,7 @@ function CompaniesPage() {
   const { companyId } = useParams();
 
   return (
-    <MainLayout>
+    <MainLayout navbarProps={{ authSlot: <NavbarAuth /> }}>
       {companyId ? <CompanyDetailPlaceholder companyId={companyId} /> : <CompaniesHero />}
       {!companyId && <CompaniesListing />}
     </MainLayout>

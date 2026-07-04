@@ -1,10 +1,14 @@
-const ROUTES = {
+export const ROUTES = {
 	home: '/',
 	jobs: '/jobs',
 	companies: '/companies',
+	login: '/login',
+	register: '/register',
+	forgotPassword: '/forgot-password',
+	resetPassword: '/reset-password',
 } as const;
 
-function getJobsPath(query = '') {
+export function getJobsPath(query = '') {
 	const normalizedQuery = query.trim().toLowerCase();
 
 	return normalizedQuery
@@ -12,16 +16,12 @@ function getJobsPath(query = '') {
 		: ROUTES.jobs;
 }
 
-function getJobDetailsPath(jobId: string) {
+export function getJobDetailsPath(jobId: string) {
 	return `${ROUTES.jobs}/${encodeURIComponent(jobId)}`;
 }
 
-function getCompanyDetailsPath(companyId: string) {
+export function getCompanyDetailsPath(companyId: string) {
 	return `${ROUTES.companies}/${encodeURIComponent(companyId)}`;
 }
 
-type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
-
-export { ROUTES };
-export { getCompanyDetailsPath, getJobDetailsPath, getJobsPath };
-export type { RoutePath };
+export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
