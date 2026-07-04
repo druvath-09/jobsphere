@@ -41,11 +41,14 @@ function DashboardStatistics() {
 	const { savedJobs } = useSavedJobs();
 	const { applications } = useApplications();
 
+	const interviewCount = applications.filter(a => a.status === 'Interviewing').length;
+
 	const stats = [
 		{ label: 'Saved Jobs', value: savedJobs.length, icon: BookmarkIcon },
 		{ label: 'Applied Jobs', value: applications.length, icon: BriefcaseIcon },
+		// TODO: Profile Views is mocked. Will be derived from backend analytics later.
 		{ label: 'Profile Views', value: 47, icon: EyeIcon },
-		{ label: 'Interviews', value: 1, icon: CalendarIcon },
+		{ label: 'Interviews', value: interviewCount, icon: CalendarIcon },
 	];
 
 	return (

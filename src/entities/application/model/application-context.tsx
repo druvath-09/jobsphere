@@ -10,6 +10,7 @@ import {
 import type { Application, ApplicationMock } from './application';
 import { resolveApplication, APPLICATION_MOCKS } from './application';
 import { useAuth } from '@/features/auth';
+import { useNotifications } from '@/features/notifications';
 
 export interface ApplicationContextType {
 	applications: Application[];
@@ -29,6 +30,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
 	const [allApplications, setAllApplications] = useState<ApplicationMock[]>([]);
 	const [loading, setLoading] = useState(true);
 	const { currentUser } = useAuth();
+	const { addNotification } = useNotifications();
 
 	// Hydrate from localStorage on mount
 	useEffect(() => {
@@ -73,6 +75,10 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
 
 	const applyToJob = useCallback((jobId: string) => {
 		if (!currentUser) return;
+		
+		const jobDetails = resolveApplication({ id: '', userId: '', jobId, status: 'Applied', appliedDate: '' });
+		const jobTitle = jobDetails?.job?.title || 'a job';
+		
 		setAllApplications((prev) => {
 			if (prev.some((app) => app.jobId === jobId && app.userId === currentUser.id)) return prev;
 			const newApp: ApplicationMock = {
@@ -84,7 +90,13 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
 			};
 			return [newApp, ...prev];
 		});
-	}, [currentUser]);
+		
+		addNotification({
+			title: 'Application Submitted',
+			message: `You have successfully applied to ${jobTitle}.`,
+			type: 'success'
+		});
+	}, [currentUser, addNotification]);
 
 	const withdrawApplication = useCallback((jobId: string) => {
 		if (!currentUser) return;

@@ -83,7 +83,7 @@ function DashboardJobCard({ job }: { job: JobListing }) {
 					<span className="text-xs font-medium text-text-secondary">{job.company}</span>
 					<span className="flex items-center gap-1 text-xs text-text-secondary shrink-0">
 						<ClockIcon className="h-3 w-3" />
-						{job.postedDaysAgo === 1 ? 'Today' : `${job.postedDaysAgo}d ago`}
+						{job.postedAt}
 					</span>
 				</div>
 

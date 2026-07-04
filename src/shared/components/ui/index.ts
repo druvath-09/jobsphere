@@ -4,6 +4,11 @@ export type { ButtonProps } from './button';
 export { Input } from './input';
 export type { InputProps } from './input';
 
+export { Textarea } from './textarea';
+export type { TextareaProps } from './textarea';
+
+export { ToastProvider, useToast } from './toast';
+
 export { Select } from './select';
 export type { SelectProps } from './select';
 

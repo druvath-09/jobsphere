@@ -12,6 +12,7 @@ import { DashboardPage } from '@/pages/dashboard';
 import { ProfilePage } from '@/pages/profile';
 import { SavedJobsPage } from '@/pages/saved-jobs';
 import { ApplicationsPage } from '@/pages/applications';
+import { NotificationsPage } from '@/pages/notifications';
 import { ProtectedRoute } from '@/app/providers/protected-route';
 import { ROUTES } from '@/shared/constants/routes';
 import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom';
@@ -42,6 +43,7 @@ function AppRouter() {
 				<Route path={ROUTES.profile} element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 				<Route path={ROUTES.savedJobs} element={<ProtectedRoute><SavedJobsPage /></ProtectedRoute>} />
 				<Route path={ROUTES.applications} element={<ProtectedRoute><ApplicationsPage /></ProtectedRoute>} />
+				<Route path={ROUTES.notifications} element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
 
 				<Route path="*" element={<HomePage />} />
 			</Routes>

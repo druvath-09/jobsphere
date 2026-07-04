@@ -123,7 +123,7 @@ function JobCard({ job }: JobCardProps) {
 
         <div className="flex shrink-0 items-center gap-2 text-xs text-text-secondary">
           <ClockIcon className="h-3.5 w-3.5" />
-          {job.postedDaysAgo === 0 ? 'Today' : `${job.postedDaysAgo}d ago`}
+          {job.postedAt}
         </div>
       </div>
 

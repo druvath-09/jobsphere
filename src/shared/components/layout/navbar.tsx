@@ -44,24 +44,7 @@ const DEFAULT_LINKS: NavLink[] = [
 /*  Search Icon                                                        */
 /* ------------------------------------------------------------------ */
 
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M17.5 17.5l-4.167-4.167M13.333 8.333A5 5 0 1 1 3.333 8.333a5 5 0 0 1 10 0z"
-      />
-    </svg>
-  );
-}
+
 
 /* ------------------------------------------------------------------ */
 /*  Hamburger Icon                                                     */
@@ -176,19 +159,7 @@ function Navbar({ links = DEFAULT_LINKS, authSlot }: NavbarProps) {
 
         {/* ---- Desktop Actions ---- */}
         <div className="hidden items-center gap-2 md:flex">
-          <button
-            type="button"
-            aria-label="Search"
-            className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-md text-text-secondary',
-              'transition-colors duration-150 hover:text-text-primary hover:bg-background',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-            )}
-          >
-            <SearchIcon className="h-4.5 w-4.5" />
-          </button>
 
-          <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
 
           {authSlot ?? (
             <>

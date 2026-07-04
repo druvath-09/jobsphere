@@ -10,6 +10,7 @@ export const ROUTES = {
 	profile: '/profile',
 	savedJobs: '/saved-jobs',
 	applications: '/applications',
+	notifications: '/notifications',
 } as const;
 
 export function getJobsPath(query = '') {

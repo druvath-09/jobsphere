@@ -36,11 +36,7 @@ function BookmarkIcon({ className, filled }: { className?: string; filled?: bool
   );
 }
 
-function formatPostedLabel(postedDaysAgo: number) {
-  if (postedDaysAgo === 0) return 'Today';
-  if (postedDaysAgo === 1) return '1 day ago';
-  return `${postedDaysAgo} days ago`;
-}
+
 
 function SectionList({ items }: { items: string[] }) {
   return (
@@ -133,7 +129,7 @@ function JobDetailsContent({ job }: JobDetailsContentProps) {
                     <Badge variant="outline">{job.employmentType}</Badge>
                     <Badge variant="outline">{job.experienceLabel}</Badge>
                     <Badge variant="outline">{job.salaryLabel}</Badge>
-                    <Badge variant="primary">{formatPostedLabel(job.postedDaysAgo)}</Badge>
+                    <Badge variant="primary">{job.postedAt}</Badge>
                   </div>
                 </div>
               </div>
@@ -283,7 +279,7 @@ function JobDetailsContent({ job }: JobDetailsContentProps) {
                 <dl className="space-y-4 text-sm text-text-secondary">
                   <div>
                     <dt className="font-medium text-text-primary">Posted</dt>
-                    <dd className="mt-1">{formatPostedLabel(job.postedDaysAgo)}</dd>
+                    <dd className="mt-1">{job.postedAt}</dd>
                   </div>
                   <div>
                     <dt className="font-medium text-text-primary">Job ID</dt>

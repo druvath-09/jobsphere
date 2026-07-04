@@ -60,8 +60,14 @@ function DashboardSavedJobs() {
 					</div>
 				))}
 				{recentSavedJobs.length === 0 && (
-					<div className="py-4 text-center text-sm text-text-secondary">
-						No saved jobs yet.
+					<div className="flex flex-col items-center justify-center py-8 text-center">
+						<div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-hover mb-3 text-text-secondary">
+							<svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+								<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+							</svg>
+						</div>
+						<p className="text-sm font-medium text-text-primary">No saved jobs</p>
+						<p className="mt-1 text-xs text-text-secondary max-w-[180px]">Bookmark jobs you like to easily find them later.</p>
 					</div>
 				)}
 			</CardContent>

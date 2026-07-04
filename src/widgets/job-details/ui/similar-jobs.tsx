@@ -4,11 +4,7 @@ import { getSimilarJobs, type JobListing } from '@/entities/job';
 import { CompanyLogoAvatar } from '@/entities/company';
 import { getJobDetailsPath } from '@/shared/constants/routes';
 
-function formatPostedLabel(postedDaysAgo: number) {
-  if (postedDaysAgo === 0) return 'Today';
-  if (postedDaysAgo === 1) return '1 day ago';
-  return `${postedDaysAgo} days ago`;
-}
+
 
 function SimilarJobCard({ job }: { job: JobListing }) {
   const navigate = useNavigate();
@@ -48,7 +44,7 @@ function SimilarJobCard({ job }: { job: JobListing }) {
               <Badge variant="outline">{job.employmentType}</Badge>
             </div>
 
-            <p className="mt-3 text-xs text-text-secondary">Posted {formatPostedLabel(job.postedDaysAgo)}</p>
+            <p className="mt-3 text-xs text-text-secondary">Posted {job.postedAt}</p>
           </div>
         </div>
 

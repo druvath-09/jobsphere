@@ -5,9 +5,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   /** Label text displayed above the input. Automatically connected via htmlFor/id. */
   label?: string;
   /** Helper text shown below the input (hidden when `error` is provided). */
-  helperText?: string;
+  helperText?: string | undefined;
   /** Error message shown below the input. Overrides helperText and applies error styling. */
-  error?: string;
+  error?: string | undefined;
 }
 
 /**

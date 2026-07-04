@@ -9,6 +9,8 @@ import {
 } from 'react';
 import type { SavedJob } from './saved-job';
 import { useAuth } from '@/features/auth';
+import { useNotifications } from '@/features/notifications';
+import { JOBS } from '@/entities/job';
 
 export interface SavedJobsContextType {
 	savedJobs: SavedJob[];
@@ -28,6 +30,7 @@ export function SavedJobsProvider({ children }: { children: ReactNode }) {
 	const [allSavedJobs, setAllSavedJobs] = useState<SavedJob[]>([]);
 	const [loading, setLoading] = useState(true);
 	const { currentUser } = useAuth();
+	const { addNotification } = useNotifications();
 
 	// Hydrate from localStorage on mount
 	useEffect(() => {
@@ -61,6 +64,10 @@ export function SavedJobsProvider({ children }: { children: ReactNode }) {
 
 	const saveJob = useCallback((jobId: string) => {
 		if (!currentUser) return;
+		
+		const jobDetails = JOBS.find((j: { id: string; title: string }) => j.id === jobId);
+		const jobTitle = jobDetails?.title || 'a job';
+		
 		setAllSavedJobs((prev) => {
 			if (prev.some((sj) => sj.jobId === jobId && sj.userId === currentUser.id)) return prev;
 			const newSavedJob: SavedJob = {
@@ -71,16 +78,33 @@ export function SavedJobsProvider({ children }: { children: ReactNode }) {
 			};
 			return [newSavedJob, ...prev]; // Prepend new saved jobs
 		});
-	}, [currentUser]);
+		
+		addNotification({
+			title: 'Job Saved',
+			message: `You saved ${jobTitle}.`,
+			type: 'info'
+		});
+	}, [currentUser, addNotification]);
 
 	const unsaveJob = useCallback((jobId: string) => {
 		if (!currentUser) return;
 		setAllSavedJobs((prev) => prev.filter((sj) => !(sj.jobId === jobId && sj.userId === currentUser.id)));
 	}, [currentUser]);
 
+	const isSaved = useCallback(
+		(jobId: string) => {
+			if (!currentUser) return false;
+			return savedJobs.some((sj) => sj.jobId === jobId);
+		},
+		[savedJobs, currentUser]
+	);
+
 	const toggleSavedJob = useCallback(
 		(jobId: string) => {
 			if (!currentUser) return;
+			const jobDetails = JOBS.find((j: { id: string; title: string }) => j.id === jobId);
+			const jobTitle = jobDetails?.title || 'a job';
+			
 			setAllSavedJobs((prev) => {
 				const exists = prev.some((sj) => sj.jobId === jobId && sj.userId === currentUser.id);
 				if (exists) {
@@ -95,16 +119,17 @@ export function SavedJobsProvider({ children }: { children: ReactNode }) {
 					return [newSavedJob, ...prev];
 				}
 			});
+			
+			// If we are saving (not unsaving), trigger notification
+			if (!isSaved(jobId)) {
+				addNotification({
+					title: 'Job Saved',
+					message: `You saved ${jobTitle}.`,
+					type: 'info'
+				});
+			}
 		},
-		[currentUser]
-	);
-
-	const isSaved = useCallback(
-		(jobId: string) => {
-			if (!currentUser) return false;
-			return savedJobs.some((sj) => sj.jobId === jobId);
-		},
-		[savedJobs, currentUser]
+		[currentUser, addNotification, isSaved]
 	);
 
 	const savedJobIds = useMemo(() => savedJobs.map((sj) => sj.jobId), [savedJobs]);
